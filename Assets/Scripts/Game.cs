@@ -29,15 +29,17 @@ public class Game : MonoBehaviour
     public GameObject trapPrefab;
 
     //Level data
-    string[,] mapArray;       //used to contain the map data from the XML file.
-    string[,] objectArray;	//used to contain the object data from the file.
+    string[,] mapArray;       //used to contain the map data from the XML file. This is used to check for collisions.
+    string[,] objectArray;	   //used to contain the object data from the file. This is used to check for collisions.
     string[,] initMapArray;   //used to restart current level
     string[,] initObjArray;   //used to restart current level
 
     List<string> mapList;
     List<string> objectList;
-    List<string> initMapList;
+    List<string> initMapList;           //These lists are used to draw the map and objects.
     List<string> initObjList;
+
+    int playerRow, playerCol;           //tracks player's position in the object array. Used for collision checking.
 
     const int MAX_ROWS = 12;
 	const int MAX_COLS = 16;
@@ -108,6 +110,8 @@ public class Game : MonoBehaviour
         //deltaTime = 0;
         playerDirection = LEFT;
         frameAdvance = 0;
+        playerRow = 0;
+        playerCol = 0;
 
         objManager = new GameObjectManager();
         player = new GameObject();
@@ -142,17 +146,38 @@ public class Game : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //check for player input
         if (!controlLocked)
         {
-            if (Input.GetKeyDown(KeyCode.LeftArrow))
+            if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A))
             {
-                playerDestination = new Vector2(player.transform.position.x - 1, player.transform.position.y);
+                //ensure there's noththing blocking player's movement
+                if (playerCol > 0 && objectArray[playerRow,playerCol - 1] != TREE && mapArray[playerRow, playerCol - 1] == LAND)
+                {
+                    playerDestination = new Vector2(player.transform.position.x - 1, player.transform.position.y);
+                    controlLocked = true;
+
+                    //if player landed on a trap or a creature, then player dies.
+
+
+                    Debug.Log("New Player Destination: " + playerDestination);
+                }
+            }
+            if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D))
+            {
+                playerDestination = new Vector2(player.transform.position.x + 1, player.transform.position.y);
                 controlLocked = true;
                 Debug.Log("New Player Destination: " + playerDestination);
             }
-            if (Input.GetKeyDown(KeyCode.RightArrow))
+            if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W))
             {
-                playerDestination = new Vector2(player.transform.position.x + 1, player.transform.position.y);
+                playerDestination = new Vector2(player.transform.position.x, player.transform.position.y + 1);
+                controlLocked = true;
+                Debug.Log("New Player Destination: " + playerDestination);
+            }
+            if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S))
+            {
+                playerDestination = new Vector2(player.transform.position.x, player.transform.position.y - 1);
                 controlLocked = true;
                 Debug.Log("New Player Destination: " + playerDestination);
             }
@@ -201,8 +226,8 @@ public class Game : MonoBehaviour
 
 
         //Object data
-        //row = 0;
-        //col = 0;
+        row = 0;
+        col = 0;
         XmlNode objectNode = levelNode.SelectSingleNode("objects");    //Accessing objects and its child nodes
         foreach (XmlNode rowNode in objectNode.ChildNodes)
         {
@@ -211,14 +236,14 @@ public class Game : MonoBehaviour
             for (int i = 0; i < rowArray.Length; i++)
             {
                 objectList.Add(rowArray[i]);
-                //objectArray[row, col] = rowArray[i];
+                objectArray[row, col] = rowArray[i];
                 //Debug.Log(objectArray[row, col]);
-                //col++;
-                //if (col == MAX_COLS)
-                    //col = 0;
+                col++;
+                if (col == MAX_COLS)
+                    col = 0;
 
             }
-           //row++;
+           row++;
         }
 
         //Copy data so that levels can be quickly restarted
@@ -227,17 +252,17 @@ public class Game : MonoBehaviour
     }
 
 
-    void BuildMap(List<string> map) //List<string> map)
+    void BuildMap(List<string> map)
     {
         /* NOTE: I have to iterate the first for loop in reverse because of how Unity displays tiles starting at the centre of the screen instead of the top left corner.
          If I don't iterate in reverse, then the level will be displayed upside down. */
         
         int i = 0;                  //used to iterate through map list.
-        float xOffset = -7.5f; //-6.5f;
-        float yOffset = -5.5f; //-5.25f;      //Unity doesn't use screen coordinates (origin is in the middle of screen), so I have to use offset to position tiles properly.
+        float xOffset = -7.5f; 
+        float yOffset = -5.5f;      //Unity doesn't use screen coordinates (origin is in the middle of screen), so I have to use offset to position tiles properly.
         for (int row = MAX_ROWS - 1; row >= 0; row--)
 		{
-            for (int col = 0; col < MAX_COLS; col++)
+            for (int col = 0; col < MAX_COLS; col++) 
 		    {
                 GameObject obj = new GameObject();
                 switch (map[i])
@@ -347,6 +372,8 @@ public class Game : MonoBehaviour
                         //Instantiate(playerPrefab, new Vector3((float)col + xOffset, (float)row + yOffset, -1), new Quaternion(0, 0, 0, 0));
                         playerDestination = new Vector2((float)col + xOffset, (float)row + yOffset);
                         Debug.Log("Starting Player Pos: " + playerDestination);
+                        playerRow = row;
+                        playerCol = col;
                         break;
 
                     default:
@@ -393,6 +420,24 @@ public class Game : MonoBehaviour
             else
                 player.transform.position = new Vector3(player.transform.position.x - (MOVE_SPEED * Time.deltaTime), player.transform.position.y, -1);
            
+        }
+        else if (player.transform.position.y < playerDestination.y) //player moves up
+        {
+            float posDiffY = playerDestination.y - player.transform.position.y;
+            if (posDiffY > 0 && posDiffY < 0.05f)
+                player.transform.position = new Vector3(player.transform.position.x, playerDestination.y, - 1);
+            else
+                player.transform.position = new Vector3(player.transform.position.x, player.transform.position.y + (MOVE_SPEED * Time.deltaTime), -1);
+
+        }
+        else if (player.transform.position.y > playerDestination.y) //player moves down
+        {
+            float posDiffY = player.transform.position.y - playerDestination.y;
+            if (posDiffY > 0 && posDiffY < 0.05f)
+                player.transform.position = new Vector3(player.transform.position.x, playerDestination.y, -1);
+            else
+                player.transform.position = new Vector3(player.transform.position.x, player.transform.position.y - (MOVE_SPEED * Time.deltaTime), -1);
+
         }
         else //at current destination
         {
