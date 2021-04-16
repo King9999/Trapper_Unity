@@ -153,8 +153,8 @@ public class Game : MonoBehaviour
 
         LoadLevel(level);
         //objManager.SetupTiles();
-        BuildMap(mapList); 
-        BuildObjects(objectList);
+        BuildMap(mapArray); 
+        BuildObjects(objectArray);
     }
 
     // Update is called once per frame
@@ -272,7 +272,7 @@ public class Game : MonoBehaviour
 
             for (int i = 0; i < rowArray.Length; i++)
             { 
-                mapList.Add(rowArray[i]);
+                //mapList.Add(rowArray[i]);
                 mapArray[row, col] = rowArray[i];
                 //Debug.Log(mapArray[row, col]);
                 col++;
@@ -294,7 +294,7 @@ public class Game : MonoBehaviour
 
             for (int i = 0; i < rowArray.Length; i++)
             {
-                objectList.Add(rowArray[i]);
+                //objectList.Add(rowArray[i]);
                 objectArray[row, col] = rowArray[i];
                
                 //Debug.Log(objectArray[row, col]);
@@ -308,13 +308,13 @@ public class Game : MonoBehaviour
         }
 
         //Copy data so that levels can be quickly restarted
-        initMapArray = mapArray;
-        initObjArray = objectArray;
+        initObjArray = (string[,])objectArray.Clone();
+        
 
     }
 
 
-    void BuildMap(List<string> map)
+    void BuildMap(string[,] map)//List<string> map)
     {
         
         int i = 0;                  //used to iterate through map list.
@@ -327,7 +327,7 @@ public class Game : MonoBehaviour
 		    {
                 //GameObject obj = new GameObject();
                 
-                switch (map[i])
+                switch (map[row, col])
                 {
                     
                     case WATER:
@@ -405,19 +405,19 @@ public class Game : MonoBehaviour
     }
 
 
-    void BuildObjects(List<string> objects)
+    void BuildObjects(string[,] objects)//List<string> objects)
     {
         int i = 0;                  //used to iterate through map list.
-        float xOffset = -7.5f; // -6.5f;
-        float yOffset = 5.5f; // -5.25f;      //Unity doesn't use screen coordinates (origin is in the middle of screen), so I have to use offset to position tiles properly.
-        string rows = "";
-        for (int row = 0; row < MAX_ROWS; row++)//int row = MAX_ROWS - 1; row >= 0; row--)
+        float xOffset = -7.5f; 
+        float yOffset = 5.5f;       //Unity doesn't use screen coordinates (origin is in the middle of screen), so I have to use offset to position tiles properly.
+        //string rows = "";
+        for (int row = 0; row < MAX_ROWS; row++)
         {
             for (int col = 0; col < MAX_COLS; col++)
             {
                 //GameObject obj = new GameObject();
-                rows += objectArray[row, col];
-                switch (objects[i])
+                //rows += objectArray[row, col];
+                switch (objects[row, col])
                 {
 
                     case TREE:
@@ -461,17 +461,11 @@ public class Game : MonoBehaviour
                 }
                 i++;               
             }
-            rows += "\n";
+            //rows += "\n";
         }
 
-        Debug.Log(rows);
-        
-        /*int index = 0;
-        foreach (Vector2 tree in treePositions)
-        {
-            Debug.Log("Tree " + index + "'s position: " + tree);
-            index++;
-        }*/
+        //Debug.Log(rows);
+
     }
 
 
