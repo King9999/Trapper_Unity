@@ -52,7 +52,7 @@ public class Game : MonoBehaviour
     List<string> initMapList;           //These lists are used to draw the map and objects.
     List<string> initObjList;
 
-    int playerRow, playerCol;           //tracks player's position in the object array. Used for collision checking.
+    int playerRow, playerCol;           //tracks player's position in the object array. Used for collision checking.         
 
     const int MAX_ROWS = 12;
 	const int MAX_COLS = 16;
@@ -105,9 +105,11 @@ public class Game : MonoBehaviour
     List<GameObject> creatureList;
 	List<GameObject> treeList;         //not sure how to use these yet
 	List<GameObject> trapList;
-    List<Vector2> trapPositions;        //needed to destroy traps when necessary.
-    List<Vector2> treePositions;        //needed to check for collision
-	List<Vector2> destinationList;		//contains list of creature destinations on map.
+    List<Vector2> trapPositions;            //needed to destroy traps when necessary.
+    List<Vector2> treePositions;            //needed to check for collision
+	List<Vector2> destinationList;		    //contains list of creature destinations on map.
+    List<int> creatureRow;                 
+    List<int> creatureCol;                   //tracks each creature's position in the object array.
 
 
     // Start is called before the first frame update
@@ -125,6 +127,8 @@ public class Game : MonoBehaviour
         frameAdvance = 0;
         playerRow = 0;
         playerCol = 0;
+        creatureRow = new List<int>();
+        creatureCol = new List<int>();
 
         objManager = new GameObjectManager();
         player = new GameObject();
@@ -179,10 +183,15 @@ public class Game : MonoBehaviour
                     playerDestination = new Vector2(player.transform.position.x - 1, player.transform.position.y);
                     controlLocked = true;
 
-                    //Move all creatures in opposite direction
-                    foreach (GameObject creature in creatureList)
+                    //Move all creatures in opposite direction (right)
+                    foreach (Vector2 creatureDestination in destinationList)
                     {
-                        Debug.Log("Creature Pos: " + creature.transform.position);
+                        int i = destinationList.IndexOf(creatureDestination);   //gets current index in foreach loop
+                        objectArray[creatureRow[i], creatureCol[i]] = "0";
+                        creatureCol[i]++;
+                        objectArray[creatureRow[i], creatureCol[i]] = CREATURE;
+                        destinationList[i] = new Vector2(creatureDestination.x + 1, creatureDestination.y);
+                        Debug.Log("New Creature Pos: " + destinationList[i]);
                     }
 
                     //if player landed on a trap or a creature, then player dies.
@@ -434,6 +443,8 @@ public class Game : MonoBehaviour
                         GameObject creature = Instantiate(creaturePrefab, new Vector3((float)col + xOffset, yOffset - (float)row, -1), new Quaternion(0, 0, 0, 0));
                         creatureList.Add(creature);
                         destinationList.Add(creature.transform.position);// new Vector2((float)col + xOffset, yOffset - (float)row));
+                        creatureRow.Add(row);
+                        creatureCol.Add(col);
                         //Debug.Log("Creature's Starting Pos: " + destinationList[0]); //creaturePrefab.transform.position);
                         break;
 
@@ -450,10 +461,10 @@ public class Game : MonoBehaviour
                         //player.name = "Player";
                         player = Instantiate(playerPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, -1), new Quaternion(0, 0, 0, 0));
                         playerDestination = player.transform.position; // new Vector2((float)col + xOffset, yOffset - (float)row);
-                        Debug.Log("Starting Player Pos: " + playerDestination);
+                        //Debug.Log("Starting Player Pos: " + playerDestination);
                         playerRow = row;
                         playerCol = col;
-                        Debug.Log("Player Row: " + playerRow);
+                        //Debug.Log("Player Row: " + playerRow);
                         break;
 
                     default:
@@ -524,6 +535,26 @@ public class Game : MonoBehaviour
             //Debug.Log("At current destination: " + player.transform.position);
         }
 
+        /****************CREATURE MOVEMENT*******************/
+
+        foreach (GameObject creature in creatureList)
+        {
+            int i = creatureList.IndexOf(creature);
+
+            if (creature.transform.position.x < destinationList[i].x)   //move right
+            {
+                float posDiffX = destinationList[i].x - creature.transform.position.x;
+                if (posDiffX > 0 && posDiffX < 0.05f)
+                {
+                    creature.transform.position = new Vector3(destinationList[i].x, creature.transform.position.y, -1);
+                }
+                else
+                {
+                    creature.transform.position = new Vector3(creature.transform.position.x + (MOVE_SPEED * Time.deltaTime), creature.transform.position.y, -1);
+
+                }
+            }
+        }
        
     }
 }
