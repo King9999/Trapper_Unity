@@ -130,6 +130,7 @@ public class Game : MonoBehaviour
 
         creatureList = new List<GameObject>();
         treeList = new List<GameObject>();
+        trapList = new List<GameObject>();
         destinationList = new List<Vector2>();
         trapPositions = new List<Vector2>();
         treePositions = new List<Vector2>();
@@ -159,9 +160,17 @@ public class Game : MonoBehaviour
                     Debug.Log("MapArray value at " + playerRow + ", " + (playerCol - 1) + ": " + mapArray[playerRow, playerCol - 1]);
 
                     //update player position in array
+                    objectArray[playerRow, playerCol] = "0";
                     playerCol--;
+                    objectArray[playerRow, playerCol] = PLAYER;
                     playerDestination = new Vector2(player.transform.position.x - 1, player.transform.position.y);
                     controlLocked = true;
+
+                    //Move all creatures in opposite direction
+                    foreach (GameObject creature in creatureList)
+                    {
+                        Debug.Log("Creature Pos: " + creature.transform.position);
+                    }
 
                     //if player landed on a trap or a creature, then player dies.
 
@@ -176,7 +185,10 @@ public class Game : MonoBehaviour
                     Debug.Log("Player Row: " + playerRow + " Player Col: " + playerCol);
                     Debug.Log("ObjectArray value at " + playerRow + ", " + (playerCol + 1) + ": " + objectArray[playerRow, playerCol + 1]);
                     Debug.Log("MapArray value at " + playerRow + ", " + (playerCol + 1) + ": " + mapArray[playerRow, playerCol + 1]);
+                    
+                    objectArray[playerRow, playerCol] = "0";
                     playerCol++;
+                    objectArray[playerRow, playerCol] = PLAYER;
                     playerDestination = new Vector2(player.transform.position.x + 1, player.transform.position.y);
                     controlLocked = true;
                     //Debug.Log("New Player Destination: " + playerDestination);
@@ -189,7 +201,10 @@ public class Game : MonoBehaviour
                     Debug.Log("Player Row: " + playerRow + " Player Col: " + playerCol);
                     Debug.Log("ObjectArray value at " + (playerRow - 1) + ", " + playerCol + ": " + objectArray[playerRow - 1, playerCol]);
                     Debug.Log("MapArray value at " + (playerRow - 1) + ", " + playerCol + ": " + mapArray[playerRow - 1, playerCol]);
+                    
+                    objectArray[playerRow, playerCol] = "0";
                     playerRow--;
+                    objectArray[playerRow, playerCol] = PLAYER;
                     playerDestination = new Vector2(player.transform.position.x, player.transform.position.y + 1);
                     controlLocked = true;
                     //Debug.Log("New Player Destination: " + playerDestination);
@@ -202,7 +217,10 @@ public class Game : MonoBehaviour
                     Debug.Log("Player Row: " + playerRow + " Player Col: " + playerCol);
                     Debug.Log("ObjectArray value at " + (playerRow + 1) + ", " + playerCol + ": " + objectArray[playerRow + 1, playerCol]);
                     Debug.Log("MapArray value at " + (playerRow + 1) + ", " + playerCol + ": " + mapArray[playerRow + 1, playerCol]);
+                    
+                    objectArray[playerRow, playerCol] = "0";
                     playerRow++;
+                    objectArray[playerRow, playerCol] = PLAYER;
                     playerDestination = new Vector2(player.transform.position.x, player.transform.position.y - 1);
                     controlLocked = true;
                     //Debug.Log("New Player Destination: " + playerDestination);
@@ -380,31 +398,32 @@ public class Game : MonoBehaviour
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Objects/tree"), new Vector3((float)col + xOffset, (float)row + yOffset, -1));
                         //obj.name = "Tree";
                         Instantiate(treePrefab, new Vector3((float)col + xOffset, yOffset - (float)row, -1), new Quaternion(0, 0, 0, 0));
-                        treeList.Add(treePrefab);
-                        treePositions.Add(new Vector2((float)col + xOffset, yOffset - (float)row));
+                        //treeList.Add(treePrefab);
+                        //treePositions.Add(new Vector2((float)col + xOffset, yOffset - (float)row));
                         break;
 
                     case CREATURE:
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Objects/creature_down"), new Vector3((float)col + xOffset, (float)row + yOffset, -1));
                         //obj.name = "Creature";
-                        Instantiate(creaturePrefab, new Vector3((float)col + xOffset, yOffset - (float)row, -1), new Quaternion(0, 0, 0, 0));
-                        creatureList.Add(creaturePrefab);
-                        destinationList.Add(new Vector2((float)col + xOffset, yOffset - (float)row));
+                        GameObject creature = Instantiate(creaturePrefab, new Vector3((float)col + xOffset, yOffset - (float)row, -1), new Quaternion(0, 0, 0, 0));
+                        creatureList.Add(creature);
+                        destinationList.Add(creature.transform.position);// new Vector2((float)col + xOffset, yOffset - (float)row));
                         //Debug.Log("Creature's Starting Pos: " + destinationList[0]); //creaturePrefab.transform.position);
                         break;
 
                     case TRAP:
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Objects/trap"), new Vector3((float)col + xOffset, (float)row + yOffset, -1));
                         //obj.name = "Trap";
-                        Instantiate(trapPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, -1), new Quaternion(0, 0, 0, 0));
-                        trapPositions.Add(new Vector2((float)col + xOffset, yOffset - (float)row));
+                        GameObject trap = Instantiate(trapPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, -1), new Quaternion(0, 0, 0, 0));
+                        trapList.Add(trap);
+                        trapPositions.Add(trap.transform.position);// new Vector2((float)col + xOffset, yOffset - (float)row));
                         break;
 
                     case PLAYER:
-                        objManager.SetupObject(player, Resources.Load<Sprite>("Objects/player_down"), new Vector3((float)col + xOffset, yOffset - (float)row, -1));
-                        player.name = "Player";
-                        //Instantiate(playerPrefab, new Vector3((float)col + xOffset, (float)row + yOffset, -1), new Quaternion(0, 0, 0, 0));
-                        playerDestination = new Vector2((float)col + xOffset, yOffset - (float)row);
+                        //objManager.SetupObject(player, Resources.Load<Sprite>("Objects/player_down"), new Vector3((float)col + xOffset, yOffset - (float)row, -1));
+                        //player.name = "Player";
+                        player = Instantiate(playerPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, -1), new Quaternion(0, 0, 0, 0));
+                        playerDestination = player.transform.position; // new Vector2((float)col + xOffset, yOffset - (float)row);
                         Debug.Log("Starting Player Pos: " + playerDestination);
                         playerRow = row;
                         playerCol = col;
