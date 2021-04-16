@@ -152,34 +152,61 @@ public class Game : MonoBehaviour
             if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A))
             {
                 //ensure there's noththing blocking player's movement
-                if (playerCol > 0 && objectArray[playerRow,playerCol - 1] != TREE && mapArray[playerRow, playerCol - 1] == LAND)
+                if (playerCol > 0 && !objectArray[playerRow,playerCol - 1].Equals(TREE) && mapArray[playerRow, playerCol - 1].Equals(LAND))
                 {
+                    Debug.Log("Player Row: " + playerRow + " Player Col: " + playerCol);
+                    Debug.Log("ObjectArray value at " + playerRow + ", " + (playerCol - 1) + ": " + objectArray[playerRow, playerCol - 1]);
+                    Debug.Log("MapArray value at " + playerRow + ", " + (playerCol - 1) + ": " + mapArray[playerRow, playerCol - 1]);
+
+                    //update player position in array
+                    playerCol--;
                     playerDestination = new Vector2(player.transform.position.x - 1, player.transform.position.y);
                     controlLocked = true;
 
                     //if player landed on a trap or a creature, then player dies.
 
 
-                    Debug.Log("New Player Destination: " + playerDestination);
+                    //Debug.Log("New Player Destination: " + playerDestination);
                 }
             }
             if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D))
             {
-                playerDestination = new Vector2(player.transform.position.x + 1, player.transform.position.y);
-                controlLocked = true;
-                Debug.Log("New Player Destination: " + playerDestination);
+                if (playerCol < MAX_COLS - 1 && !objectArray[playerRow, playerCol + 1].Equals(TREE) && mapArray[playerRow, playerCol + 1].Equals(LAND))
+                {
+                    Debug.Log("Player Row: " + playerRow + " Player Col: " + playerCol);
+                    Debug.Log("ObjectArray value at " + playerRow + ", " + (playerCol + 1) + ": " + objectArray[playerRow, playerCol + 1]);
+                    Debug.Log("MapArray value at " + playerRow + ", " + (playerCol + 1) + ": " + mapArray[playerRow, playerCol + 1]);
+                    playerCol++;
+                    playerDestination = new Vector2(player.transform.position.x + 1, player.transform.position.y);
+                    controlLocked = true;
+                    //Debug.Log("New Player Destination: " + playerDestination);
+                }
             }
             if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W))
             {
-                playerDestination = new Vector2(player.transform.position.x, player.transform.position.y + 1);
-                controlLocked = true;
-                Debug.Log("New Player Destination: " + playerDestination);
+                if (playerRow > 0 && !objectArray[playerRow - 1, playerCol].Equals(TREE) && mapArray[playerRow - 1, playerCol].Equals(LAND))
+                {
+                    Debug.Log("Player Row: " + playerRow + " Player Col: " + playerCol);
+                    Debug.Log("ObjectArray value at " + (playerRow - 1) + ", " + playerCol + ": " + objectArray[playerRow - 1, playerCol]);
+                    Debug.Log("MapArray value at " + (playerRow - 1) + ", " + playerCol + ": " + mapArray[playerRow - 1, playerCol]);
+                    playerRow--;
+                    playerDestination = new Vector2(player.transform.position.x, player.transform.position.y + 1);
+                    controlLocked = true;
+                    //Debug.Log("New Player Destination: " + playerDestination);
+                }
             }
             if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S))
             {
-                playerDestination = new Vector2(player.transform.position.x, player.transform.position.y - 1);
-                controlLocked = true;
-                Debug.Log("New Player Destination: " + playerDestination);
+                if (playerRow < MAX_ROWS - 1 && !objectArray[playerRow + 1, playerCol].Equals(TREE) && mapArray[playerRow + 1, playerCol].Equals(LAND))
+                {
+                    Debug.Log("Player Row: " + playerRow + " Player Col: " + playerCol);
+                    Debug.Log("ObjectArray value at " + (playerRow + 1) + ", " + playerCol + ": " + objectArray[playerRow + 1, playerCol]);
+                    Debug.Log("MapArray value at " + (playerRow + 1) + ", " + playerCol + ": " + mapArray[playerRow + 1, playerCol]);
+                    playerRow++;
+                    playerDestination = new Vector2(player.transform.position.x, player.transform.position.y - 1);
+                    controlLocked = true;
+                    //Debug.Log("New Player Destination: " + playerDestination);
+                }
             }
         }
         UpdateObjects();
@@ -228,6 +255,7 @@ public class Game : MonoBehaviour
         //Object data
         row = 0;
         col = 0;
+       
         XmlNode objectNode = levelNode.SelectSingleNode("objects");    //Accessing objects and its child nodes
         foreach (XmlNode rowNode in objectNode.ChildNodes)
         {
@@ -237,6 +265,7 @@ public class Game : MonoBehaviour
             {
                 objectList.Add(rowArray[i]);
                 objectArray[row, col] = rowArray[i];
+               
                 //Debug.Log(objectArray[row, col]);
                 col++;
                 if (col == MAX_COLS)
@@ -244,11 +273,12 @@ public class Game : MonoBehaviour
 
             }
            row++;
+           
         }
 
         //Copy data so that levels can be quickly restarted
         //TODO: Might not need to do this step
-
+       
     }
 
 
@@ -259,65 +289,67 @@ public class Game : MonoBehaviour
         
         int i = 0;                  //used to iterate through map list.
         float xOffset = -7.5f; 
-        float yOffset = -5.5f;      //Unity doesn't use screen coordinates (origin is in the middle of screen), so I have to use offset to position tiles properly.
-        for (int row = MAX_ROWS - 1; row >= 0; row--)
+        float yOffset = 5.5f;      //Unity doesn't use screen coordinates (origin is in the middle of screen), so I have to use offset to position tiles properly.
+       
+        for (int row = 0; row < MAX_ROWS; row++)// int row = MAX_ROWS - 1; row >= 0; row--)
 		{
             for (int col = 0; col < MAX_COLS; col++) 
 		    {
                 GameObject obj = new GameObject();
+                
                 switch (map[i])
                 {
                     
                     case WATER:
-                        objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/tile_water"), new Vector3((float)col + xOffset, (float)row + yOffset, 0));
+                        objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/tile_water"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
                         break;
 
                     case LAND:
-                        objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/tile_land"), new Vector3((float)col + xOffset, (float)row + yOffset, 0));
+                        objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/tile_land"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
                         break;
 
                     case LAND_BOTTOM:
-                        objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_bottom"), new Vector3((float)col + xOffset, (float)row + yOffset, 0));
+                        objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_bottom"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
                         break;
 
                     case LAND_TOP:
-                        objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_top"), new Vector3((float)col + xOffset, (float)row + yOffset, 0));
+                        objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_top"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
                         break;
 
                     case LAND_LEFT:
-                        objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_left"), new Vector3((float)col + xOffset, (float)row + yOffset, 0));
+                        objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_left"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
                         break;
 
                     case LAND_RIGHT:
-                        objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_right"), new Vector3((float)col + xOffset, (float)row + yOffset, 0));
+                        objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_right"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
                         break;
 
                     case LAND_UPLEFT:
-                        objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_upperleft"), new Vector3((float)col + xOffset, (float)row + yOffset, 0));
+                        objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_upperleft"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
                         break;
 
                     case LAND_UPRIGHT:  //TODO: Does not display correctly normally. Had to switch the orignial values to get it to work.
-                        objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_upperright"), new Vector3((float)col + xOffset, (float)row + yOffset, 0));
+                        objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_upperright"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
                         break;
 
                     case LAND_BTMLEFT:
-                        objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_bottomleft"), new Vector3((float)col + xOffset, (float)row + yOffset, 0));
+                        objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_bottomleft"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
                         break;
 
                     case LAND_BTMRIGHT: //TODO: Does not display correctly normally. Had to switch the orignial values to get it to work.
-                        objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_bottomright"), new Vector3((float)col + xOffset, (float)row + yOffset, 0));
+                        objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_bottomright"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
                         break;
 
                     case LAND_TOPBTM:
-                        objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_topbottom"), new Vector3((float)col + xOffset, (float)row + yOffset, 0));
+                        objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_topbottom"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
                         break;
 
                     case LAND_TOPBTMLEFT:
-                        objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_topbottomleft"), new Vector3((float)col + xOffset, (float)row + yOffset, 0));
+                        objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_topbottomleft"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
                         break;
 
                     case LAND_TOPBTMRIGHT:
-                        objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_topbottomright"), new Vector3((float)col + xOffset, (float)row + yOffset, 0));
+                        objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_topbottomright"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
                         break;
 
                     default:
@@ -333,62 +365,68 @@ public class Game : MonoBehaviour
     {
         int i = 0;                  //used to iterate through map list.
         float xOffset = -7.5f; // -6.5f;
-        float yOffset = -5.5f; // -5.25f;      //Unity doesn't use screen coordinates (origin is in the middle of screen), so I have to use offset to position tiles properly.
-        for (int row = MAX_ROWS - 1; row >= 0; row--)
+        float yOffset = 5.5f; // -5.25f;      //Unity doesn't use screen coordinates (origin is in the middle of screen), so I have to use offset to position tiles properly.
+        string rows = "";
+        for (int row = 0; row < MAX_ROWS; row++)//int row = MAX_ROWS - 1; row >= 0; row--)
         {
             for (int col = 0; col < MAX_COLS; col++)
             {
                 //GameObject obj = new GameObject();
+                rows += objectArray[row, col];
                 switch (objects[i])
                 {
 
                     case TREE:
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Objects/tree"), new Vector3((float)col + xOffset, (float)row + yOffset, -1));
                         //obj.name = "Tree";
-                        Instantiate(treePrefab, new Vector3((float)col + xOffset, (float)row + yOffset, -1), new Quaternion(0, 0, 0, 0));
+                        Instantiate(treePrefab, new Vector3((float)col + xOffset, yOffset - (float)row, -1), new Quaternion(0, 0, 0, 0));
                         treeList.Add(treePrefab);
-                        treePositions.Add(new Vector2((float)col + xOffset, (float)row + yOffset));
+                        treePositions.Add(new Vector2((float)col + xOffset, yOffset - (float)row));
                         break;
 
                     case CREATURE:
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Objects/creature_down"), new Vector3((float)col + xOffset, (float)row + yOffset, -1));
                         //obj.name = "Creature";
-                        Instantiate(creaturePrefab, new Vector3((float)col + xOffset, (float)row + yOffset, -1), new Quaternion(0, 0, 0, 0));
+                        Instantiate(creaturePrefab, new Vector3((float)col + xOffset, yOffset - (float)row, -1), new Quaternion(0, 0, 0, 0));
                         creatureList.Add(creaturePrefab);
-                        destinationList.Add(new Vector2((float)col + xOffset, (float)row + yOffset));
+                        destinationList.Add(new Vector2((float)col + xOffset, yOffset - (float)row));
                         //Debug.Log("Creature's Starting Pos: " + destinationList[0]); //creaturePrefab.transform.position);
                         break;
 
                     case TRAP:
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Objects/trap"), new Vector3((float)col + xOffset, (float)row + yOffset, -1));
                         //obj.name = "Trap";
-                        Instantiate(trapPrefab, new Vector3((float)col + xOffset, (float)row + yOffset, -1), new Quaternion(0, 0, 0, 0));
-                        trapPositions.Add(new Vector2((float)col + xOffset, (float)row + yOffset));
+                        Instantiate(trapPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, -1), new Quaternion(0, 0, 0, 0));
+                        trapPositions.Add(new Vector2((float)col + xOffset, yOffset - (float)row));
                         break;
 
                     case PLAYER:
-                        objManager.SetupObject(player, Resources.Load<Sprite>("Objects/player_down"), new Vector3((float)col + xOffset, (float)row + yOffset, -1));
+                        objManager.SetupObject(player, Resources.Load<Sprite>("Objects/player_down"), new Vector3((float)col + xOffset, yOffset - (float)row, -1));
                         player.name = "Player";
                         //Instantiate(playerPrefab, new Vector3((float)col + xOffset, (float)row + yOffset, -1), new Quaternion(0, 0, 0, 0));
-                        playerDestination = new Vector2((float)col + xOffset, (float)row + yOffset);
+                        playerDestination = new Vector2((float)col + xOffset, yOffset - (float)row);
                         Debug.Log("Starting Player Pos: " + playerDestination);
                         playerRow = row;
                         playerCol = col;
+                        Debug.Log("Player Row: " + playerRow);
                         break;
 
                     default:
                         break;
                 }
-                i++;
+                i++;               
             }
+            rows += "\n";
         }
 
-        int index = 0;
+        Debug.Log(rows);
+        
+        /*int index = 0;
         foreach (Vector2 tree in treePositions)
         {
             Debug.Log("Tree " + index + "'s position: " + tree);
             index++;
-        }
+        }*/
     }
 
 
@@ -444,7 +482,7 @@ public class Game : MonoBehaviour
             controlLocked = false;
             //TODO: stop sprite animation
             
-            Debug.Log("At current destination: " + player.transform.position);
+            //Debug.Log("At current destination: " + player.transform.position);
         }
 
        
