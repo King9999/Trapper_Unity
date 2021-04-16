@@ -1054,6 +1054,19 @@ MonoBehaviour:
   treePrefab: {fileID: 3834049968605711515, guid: 0ad65c59a6733fb408302df23b679b10, type: 3}
   creaturePrefab: {fileID: 6884281912398781217, guid: 34acb191fff671c4f9e4c4703ae5dd53, type: 3}
   trapPrefab: {fileID: 316431639943929735, guid: ca5c047863bcd0f4083e4fa492a89e7a, type: 3}
+  landPrefab: {fileID: 3163370985798628498, guid: 21a09676a4931b942af18c47d859e16a, type: 3}
+  waterPrefab: {fileID: 2097945486499886069, guid: cec4859db35f9af42898fbb0147bcdac, type: 3}
+  landTopPrefab: {fileID: 3155860888433879308, guid: 4d6829dfaf0b2c0429ac69a591039528, type: 3}
+  landBottomPrefab: {fileID: 7548877791667657628, guid: fbc19c7c7ee351d41b3080be1ee52c16, type: 3}
+  landLeftPrefab: {fileID: 3517608216338152481, guid: 9e1adaf5436d8fe49b5af31216adcaa6, type: 3}
+  landRightPrefab: {fileID: 6038537203832483174, guid: e5c847d7ab2cadd4db52f30c9c786bbd, type: 3}
+  landTopLeftPrefab: {fileID: 5405320142295616527, guid: 4a22deee971532741bf28991e6c26ec2, type: 3}
+  landTopRightPrefab: {fileID: 8233655597425374233, guid: 41a7d864fc34fad4eb765cddee583baf, type: 3}
+  landBottomLeftPrefab: {fileID: 8358721974001229325, guid: b8ee004c73aaa5b4a9f13eedfc95f102, type: 3}
+  landBottomRightPrefab: {fileID: 179586587682879760, guid: d0f3d19fc7933f5478926227b9762510, type: 3}
+  landTopBottomPrefab: {fileID: 1697766750365071104, guid: 5d69b7c61d608fd409a99617001696b6, type: 3}
+  landTopBottomLeftPrefab: {fileID: 6412766009622974957, guid: 8ec5182d71947784785e5b8950623ef1, type: 3}
+  landTopBottomRightPrefab: {fileID: 7055286051737672882, guid: 79340839004f84d429912048ca205b0e, type: 3}
   levelFile: {fileID: 4900000, guid: c0703714b4232b74bb1dc60720eb9237, type: 3}
   playerLives: 2
 --- !u!1 &1630588486

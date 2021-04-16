@@ -27,6 +27,19 @@ public class Game : MonoBehaviour
     public GameObject treePrefab;
     public GameObject creaturePrefab;
     public GameObject trapPrefab;
+    public GameObject landPrefab;
+    public GameObject waterPrefab;
+    public GameObject landTopPrefab;
+    public GameObject landBottomPrefab;
+    public GameObject landLeftPrefab;
+    public GameObject landRightPrefab;
+    public GameObject landTopLeftPrefab;
+    public GameObject landTopRightPrefab;
+    public GameObject landBottomLeftPrefab;
+    public GameObject landBottomRightPrefab;
+    public GameObject landTopBottomPrefab;
+    public GameObject landTopBottomLeftPrefab;
+    public GameObject landTopBottomRightPrefab;
 
     //Level data
     string[,] mapArray;       //used to contain the map data from the XML file. This is used to check for collisions.
@@ -295,15 +308,14 @@ public class Game : MonoBehaviour
         }
 
         //Copy data so that levels can be quickly restarted
-        //TODO: Might not need to do this step
-       
+        initMapArray = mapArray;
+        initObjArray = objectArray;
+
     }
 
 
     void BuildMap(List<string> map)
     {
-        /* NOTE: I have to iterate the first for loop in reverse because of how Unity displays tiles starting at the centre of the screen instead of the top left corner.
-         If I don't iterate in reverse, then the level will be displayed upside down. */
         
         int i = 0;                  //used to iterate through map list.
         float xOffset = -7.5f; 
@@ -313,61 +325,75 @@ public class Game : MonoBehaviour
 		{
             for (int col = 0; col < MAX_COLS; col++) 
 		    {
-                GameObject obj = new GameObject();
+                //GameObject obj = new GameObject();
                 
                 switch (map[i])
                 {
                     
                     case WATER:
-                        objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/tile_water"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
+                        //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/tile_water"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
+                        Instantiate(waterPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, 0), new Quaternion(0, 0, 0, 0));
+                        //Debug.Log("Water Location: " + waterObj.transform.position);
                         break;
 
                     case LAND:
-                        objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/tile_land"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
+                        //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/tile_land"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
+                        Instantiate(landPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, 0), new Quaternion(0, 0, 0, 0));
                         break;
 
                     case LAND_BOTTOM:
-                        objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_bottom"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
+                        //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_bottom"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
+                        Instantiate(landBottomPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, 0), new Quaternion(0, 0, 0, 0));
                         break;
 
                     case LAND_TOP:
-                        objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_top"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
+                        //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_top"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
+                        Instantiate(landTopPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, 0), new Quaternion(0, 0, 0, 0));
                         break;
 
                     case LAND_LEFT:
-                        objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_left"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
+                        //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_left"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
+                        Instantiate(landLeftPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, 0), new Quaternion(0, 0, 0, 0));
                         break;
 
                     case LAND_RIGHT:
-                        objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_right"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
+                        //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_right"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
+                        Instantiate(landRightPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, 0), new Quaternion(0, 0, 0, 0));
                         break;
 
                     case LAND_UPLEFT:
-                        objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_upperleft"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
+                        //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_upperleft"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
+                        Instantiate(landTopLeftPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, 0), new Quaternion(0, 0, 0, 0));
                         break;
 
                     case LAND_UPRIGHT:  //TODO: Does not display correctly normally. Had to switch the orignial values to get it to work.
-                        objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_upperright"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
+                        //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_upperright"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
+                        Instantiate(landTopRightPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, 0), new Quaternion(0, 0, 0, 0));
                         break;
 
                     case LAND_BTMLEFT:
-                        objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_bottomleft"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
+                        //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_bottomleft"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
+                        Instantiate(landBottomLeftPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, 0), new Quaternion(0, 0, 0, 0));
                         break;
 
                     case LAND_BTMRIGHT: //TODO: Does not display correctly normally. Had to switch the orignial values to get it to work.
-                        objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_bottomright"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
+                        //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_bottomright"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
+                        Instantiate(landBottomRightPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, 0), new Quaternion(0, 0, 0, 0));
                         break;
 
                     case LAND_TOPBTM:
-                        objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_topbottom"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
+                        //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_topbottom"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
+                        Instantiate(landTopBottomPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, 0), new Quaternion(0, 0, 0, 0));
                         break;
 
                     case LAND_TOPBTMLEFT:
-                        objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_topbottomleft"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
+                        //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_topbottomleft"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
+                        Instantiate(landTopBottomLeftPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, 0), new Quaternion(0, 0, 0, 0));
                         break;
 
                     case LAND_TOPBTMRIGHT:
-                        objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_topbottomright"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
+                        //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_topbottomright"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
+                        Instantiate(landTopBottomRightPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, 0), new Quaternion(0, 0, 0, 0));
                         break;
 
                     default:
