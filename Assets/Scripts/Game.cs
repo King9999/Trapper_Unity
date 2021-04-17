@@ -164,17 +164,24 @@ public class Game : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        CheckForInput();
+        UpdateObjects();
+    }
+
+    //All user input is checked here. Must go into Update method
+    void CheckForInput()
+    {
         //check for player input
         if (!controlLocked)
         {
             if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A))
             {
                 //ensure there's noththing blocking player's movement
-                if (playerCol > 0 && !objectArray[playerRow,playerCol - 1].Equals(TREE) && mapArray[playerRow, playerCol - 1].Equals(LAND))
+                if (playerCol > 0 && !objectArray[playerRow, playerCol - 1].Equals(TREE) && mapArray[playerRow, playerCol - 1].Equals(LAND))
                 {
-                    Debug.Log("Player Row: " + playerRow + " Player Col: " + playerCol);
-                    Debug.Log("ObjectArray value at " + playerRow + ", " + (playerCol - 1) + ": " + objectArray[playerRow, playerCol - 1]);
-                    Debug.Log("MapArray value at " + playerRow + ", " + (playerCol - 1) + ": " + mapArray[playerRow, playerCol - 1]);
+                    //Debug.Log("Player Row: " + playerRow + " Player Col: " + playerCol);
+                    //Debug.Log("ObjectArray value at " + playerRow + ", " + (playerCol - 1) + ": " + objectArray[playerRow, playerCol - 1]);
+                    //Debug.Log("MapArray value at " + playerRow + ", " + (playerCol - 1) + ": " + mapArray[playerRow, playerCol - 1]);
 
                     //update player position in array
                     objectArray[playerRow, playerCol] = "0";
@@ -184,14 +191,21 @@ public class Game : MonoBehaviour
                     controlLocked = true;
 
                     //Move all creatures in opposite direction (right)
-                    foreach (Vector2 creatureDestination in destinationList)
+                    foreach (GameObject creature in creatureList)
                     {
-                        int i = destinationList.IndexOf(creatureDestination);   //gets current index in foreach loop
-                        objectArray[creatureRow[i], creatureCol[i]] = "0";
-                        creatureCol[i]++;
-                        objectArray[creatureRow[i], creatureCol[i]] = CREATURE;
-                        destinationList[i] = new Vector2(creatureDestination.x + 1, creatureDestination.y);
-                        Debug.Log("New Creature Pos: " + destinationList[i]);
+                        //gets current index in foreach loop
+                        int i = creatureList.IndexOf(creature);
+
+                        //creature has the same movement restrictions as player, but other creatures prevent them from moving also.
+                        if (creatureCol[i] < MAX_COLS - 1 && !objectArray[creatureRow[i], creatureCol[i] + 1].Equals(TREE) && !objectArray[creatureRow[i], creatureCol[i] + 1].Equals(CREATURE)
+                            && mapArray[creatureRow[i], creatureCol[i] + 1].Equals(LAND))
+                        {                               
+                            objectArray[creatureRow[i], creatureCol[i]] = "0";
+                            creatureCol[i]++;
+                            objectArray[creatureRow[i], creatureCol[i]] = CREATURE;
+                            destinationList[i] = new Vector2(creature.transform.position.x + 1, creature.transform.position.y);
+                            Debug.Log("New Creature Pos: " + destinationList[i]);
+                        }
                     }
 
                     //if player landed on a trap or a creature, then player dies.
@@ -207,13 +221,31 @@ public class Game : MonoBehaviour
                     Debug.Log("Player Row: " + playerRow + " Player Col: " + playerCol);
                     Debug.Log("ObjectArray value at " + playerRow + ", " + (playerCol + 1) + ": " + objectArray[playerRow, playerCol + 1]);
                     Debug.Log("MapArray value at " + playerRow + ", " + (playerCol + 1) + ": " + mapArray[playerRow, playerCol + 1]);
-                    
+
                     objectArray[playerRow, playerCol] = "0";
                     playerCol++;
                     objectArray[playerRow, playerCol] = PLAYER;
                     playerDestination = new Vector2(player.transform.position.x + 1, player.transform.position.y);
                     controlLocked = true;
                     //Debug.Log("New Player Destination: " + playerDestination);
+
+                    //Move all creatures in opposite direction (left)
+                    foreach (GameObject creature in creatureList)
+                    {
+                        //gets current index in foreach loop
+                        int i = creatureList.IndexOf(creature);
+
+                        //creature has the same movement restrictions as player, but other creatures prevent them from moving also.
+                        if (creatureCol[i] > 0 && !objectArray[creatureRow[i], creatureCol[i] - 1].Equals(TREE) && !objectArray[creatureRow[i], creatureCol[i] - 1].Equals(CREATURE)
+                            && mapArray[creatureRow[i], creatureCol[i] - 1].Equals(LAND))
+                        {
+                            objectArray[creatureRow[i], creatureCol[i]] = "0";
+                            creatureCol[i]--;
+                            objectArray[creatureRow[i], creatureCol[i]] = CREATURE;
+                            destinationList[i] = new Vector2(creature.transform.position.x - 1, creature.transform.position.y);
+                            Debug.Log("New Creature Pos: " + destinationList[i]);
+                        }
+                    }
                 }
             }
             if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W))
@@ -223,7 +255,7 @@ public class Game : MonoBehaviour
                     Debug.Log("Player Row: " + playerRow + " Player Col: " + playerCol);
                     Debug.Log("ObjectArray value at " + (playerRow - 1) + ", " + playerCol + ": " + objectArray[playerRow - 1, playerCol]);
                     Debug.Log("MapArray value at " + (playerRow - 1) + ", " + playerCol + ": " + mapArray[playerRow - 1, playerCol]);
-                    
+
                     objectArray[playerRow, playerCol] = "0";
                     playerRow--;
                     objectArray[playerRow, playerCol] = PLAYER;
@@ -239,7 +271,7 @@ public class Game : MonoBehaviour
                     Debug.Log("Player Row: " + playerRow + " Player Col: " + playerCol);
                     Debug.Log("ObjectArray value at " + (playerRow + 1) + ", " + playerCol + ": " + objectArray[playerRow + 1, playerCol]);
                     Debug.Log("MapArray value at " + (playerRow + 1) + ", " + playerCol + ": " + mapArray[playerRow + 1, playerCol]);
-                    
+
                     objectArray[playerRow, playerCol] = "0";
                     playerRow++;
                     objectArray[playerRow, playerCol] = PLAYER;
@@ -249,7 +281,6 @@ public class Game : MonoBehaviour
                 }
             }
         }
-        UpdateObjects();
     }
 
     void LoadLevel(int level)
@@ -480,10 +511,11 @@ public class Game : MonoBehaviour
     }
 
 
+    //Used to move all objects when necessary. Must go into Update method
     void UpdateObjects()
     {
-        //Used to move all objects when necessary.
-
+       
+        /****************PLAYER MOVEMENT*******************/
         if (player.transform.position.x < playerDestination.x)  //player moves right
         {
             //The float values when the player moves are extremely precise, so need to do an additional check for when player is close to destination.
@@ -551,6 +583,19 @@ public class Game : MonoBehaviour
                 else
                 {
                     creature.transform.position = new Vector3(creature.transform.position.x + (MOVE_SPEED * Time.deltaTime), creature.transform.position.y, -1);
+
+                }
+            }
+            else if (creature.transform.position.x > destinationList[i].x)   //move left
+            {
+                float posDiffX = creature.transform.position.x - destinationList[i].x;
+                if (posDiffX > 0 && posDiffX < 0.05f)
+                {
+                    creature.transform.position = new Vector3(destinationList[i].x, creature.transform.position.y, -1);
+                }
+                else
+                {
+                    creature.transform.position = new Vector3(creature.transform.position.x - (MOVE_SPEED * Time.deltaTime), creature.transform.position.y, -1);
 
                 }
             }
