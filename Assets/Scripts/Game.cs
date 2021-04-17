@@ -204,7 +204,7 @@ public class Game : MonoBehaviour
                             creatureCol[i]++;
                             objectArray[creatureRow[i], creatureCol[i]] = CREATURE;
                             destinationList[i] = new Vector2(creature.transform.position.x + 1, creature.transform.position.y);
-                            Debug.Log("New Creature Pos: " + destinationList[i]);
+                            //Debug.Log("New Creature Pos: " + destinationList[i]);
                         }
                     }
 
@@ -218,9 +218,9 @@ public class Game : MonoBehaviour
             {
                 if (playerCol < MAX_COLS - 1 && !objectArray[playerRow, playerCol + 1].Equals(TREE) && mapArray[playerRow, playerCol + 1].Equals(LAND))
                 {
-                    Debug.Log("Player Row: " + playerRow + " Player Col: " + playerCol);
-                    Debug.Log("ObjectArray value at " + playerRow + ", " + (playerCol + 1) + ": " + objectArray[playerRow, playerCol + 1]);
-                    Debug.Log("MapArray value at " + playerRow + ", " + (playerCol + 1) + ": " + mapArray[playerRow, playerCol + 1]);
+                    //Debug.Log("Player Row: " + playerRow + " Player Col: " + playerCol);
+                   // Debug.Log("ObjectArray value at " + playerRow + ", " + (playerCol + 1) + ": " + objectArray[playerRow, playerCol + 1]);
+                    //Debug.Log("MapArray value at " + playerRow + ", " + (playerCol + 1) + ": " + mapArray[playerRow, playerCol + 1]);
 
                     objectArray[playerRow, playerCol] = "0";
                     playerCol++;
@@ -243,7 +243,7 @@ public class Game : MonoBehaviour
                             creatureCol[i]--;
                             objectArray[creatureRow[i], creatureCol[i]] = CREATURE;
                             destinationList[i] = new Vector2(creature.transform.position.x - 1, creature.transform.position.y);
-                            Debug.Log("New Creature Pos: " + destinationList[i]);
+                            //Debug.Log("New Creature Pos: " + destinationList[i]);
                         }
                     }
                 }
@@ -252,9 +252,9 @@ public class Game : MonoBehaviour
             {
                 if (playerRow > 0 && !objectArray[playerRow - 1, playerCol].Equals(TREE) && mapArray[playerRow - 1, playerCol].Equals(LAND))
                 {
-                    Debug.Log("Player Row: " + playerRow + " Player Col: " + playerCol);
-                    Debug.Log("ObjectArray value at " + (playerRow - 1) + ", " + playerCol + ": " + objectArray[playerRow - 1, playerCol]);
-                    Debug.Log("MapArray value at " + (playerRow - 1) + ", " + playerCol + ": " + mapArray[playerRow - 1, playerCol]);
+                    //Debug.Log("Player Row: " + playerRow + " Player Col: " + playerCol);
+                   // Debug.Log("ObjectArray value at " + (playerRow - 1) + ", " + playerCol + ": " + objectArray[playerRow - 1, playerCol]);
+                    //Debug.Log("MapArray value at " + (playerRow - 1) + ", " + playerCol + ": " + mapArray[playerRow - 1, playerCol]);
 
                     objectArray[playerRow, playerCol] = "0";
                     playerRow--;
@@ -262,15 +262,32 @@ public class Game : MonoBehaviour
                     playerDestination = new Vector2(player.transform.position.x, player.transform.position.y + 1);
                     controlLocked = true;
                     //Debug.Log("New Player Destination: " + playerDestination);
+
+                    //Move all creatures in opposite direction (down)
+                    foreach (GameObject creature in creatureList)
+                    {
+                        
+                        int i = creatureList.IndexOf(creature);
+
+                        if (creatureRow[i] < MAX_ROWS - 1 && !objectArray[creatureRow[i] + 1, creatureCol[i]].Equals(TREE) && !objectArray[creatureRow[i] + 1, creatureCol[i]].Equals(CREATURE)
+                            && mapArray[creatureRow[i] + 1, creatureCol[i]].Equals(LAND))
+                        {
+                            objectArray[creatureRow[i], creatureCol[i]] = "0";
+                            creatureRow[i]++;
+                            objectArray[creatureRow[i], creatureCol[i]] = CREATURE;
+                            destinationList[i] = new Vector2(creature.transform.position.x, creature.transform.position.y - 1);
+                            //Debug.Log("New Creature Pos: " + destinationList[i]);
+                        }
+                    }
                 }
             }
             if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S))
             {
                 if (playerRow < MAX_ROWS - 1 && !objectArray[playerRow + 1, playerCol].Equals(TREE) && mapArray[playerRow + 1, playerCol].Equals(LAND))
                 {
-                    Debug.Log("Player Row: " + playerRow + " Player Col: " + playerCol);
-                    Debug.Log("ObjectArray value at " + (playerRow + 1) + ", " + playerCol + ": " + objectArray[playerRow + 1, playerCol]);
-                    Debug.Log("MapArray value at " + (playerRow + 1) + ", " + playerCol + ": " + mapArray[playerRow + 1, playerCol]);
+                    //Debug.Log("Player Row: " + playerRow + " Player Col: " + playerCol);
+                   // Debug.Log("ObjectArray value at " + (playerRow + 1) + ", " + playerCol + ": " + objectArray[playerRow + 1, playerCol]);
+                   // Debug.Log("MapArray value at " + (playerRow + 1) + ", " + playerCol + ": " + mapArray[playerRow + 1, playerCol]);
 
                     objectArray[playerRow, playerCol] = "0";
                     playerRow++;
@@ -278,6 +295,23 @@ public class Game : MonoBehaviour
                     playerDestination = new Vector2(player.transform.position.x, player.transform.position.y - 1);
                     controlLocked = true;
                     //Debug.Log("New Player Destination: " + playerDestination);
+
+                    //Move all creatures in opposite direction (up)
+                    foreach (GameObject creature in creatureList)
+                    {
+
+                        int i = creatureList.IndexOf(creature);
+
+                        if (creatureRow[i] > 0 && !objectArray[creatureRow[i] - 1, creatureCol[i]].Equals(TREE) && !objectArray[creatureRow[i] - 1, creatureCol[i]].Equals(CREATURE)
+                            && mapArray[creatureRow[i] - 1, creatureCol[i]].Equals(LAND))
+                        {
+                            objectArray[creatureRow[i], creatureCol[i]] = "0";
+                            creatureRow[i]--;
+                            objectArray[creatureRow[i], creatureCol[i]] = CREATURE;
+                            destinationList[i] = new Vector2(creature.transform.position.x, creature.transform.position.y + 1);
+                            //Debug.Log("New Creature Pos: " + destinationList[i]);
+                        }
+                    }
                 }
             }
         }
@@ -596,6 +630,32 @@ public class Game : MonoBehaviour
                 else
                 {
                     creature.transform.position = new Vector3(creature.transform.position.x - (MOVE_SPEED * Time.deltaTime), creature.transform.position.y, -1);
+
+                }
+            }
+            else if (creature.transform.position.y < destinationList[i].y)   //move up
+            {
+                float posDiffY = destinationList[i].y - creature.transform.position.y;
+                if (posDiffY > 0 && posDiffY < 0.05f)
+                {
+                    creature.transform.position = new Vector3(creature.transform.position.x, destinationList[i].y, -1);
+                }
+                else
+                {
+                    creature.transform.position = new Vector3(creature.transform.position.x, creature.transform.position.y + (MOVE_SPEED * Time.deltaTime), -1);
+
+                }
+            }
+            else if (creature.transform.position.y > destinationList[i].y)   //move down
+            {
+                float posDiffY = creature.transform.position.y - destinationList[i].y;
+                if (posDiffY > 0 && posDiffY < 0.05f)
+                {
+                    creature.transform.position = new Vector3(creature.transform.position.x, destinationList[i].y, -1);
+                }
+                else
+                {
+                    creature.transform.position = new Vector3(creature.transform.position.x, creature.transform.position.y - (MOVE_SPEED * Time.deltaTime), -1);
 
                 }
             }
