@@ -19,7 +19,7 @@ public class Game : MonoBehaviour
     int waitTimer;          //used to delay screen changes in frames.
     public UI ui;           //need this to make changes to UI such as stage number or lives.
 
-    GameObjectManager objManager;       //used to create the level objects and tiles at runtime.
+    //GameObjectManager objManager;       //used to create the level objects and tiles at runtime.
     GameObject player;                  //used to create a player at runtime so that I can get their position and move them when necessary.
 
     //prefabs
@@ -81,6 +81,7 @@ public class Game : MonoBehaviour
 	const string TRAP = "B";
 	const string CREATURE = "C";
 	const string PLAYER = "P";
+    const string EMPTY = "0";
 
     //player direction frames.
     const int LEFT = 1;
@@ -103,6 +104,7 @@ public class Game : MonoBehaviour
 
     //creatures & objects
     List<GameObject> creatureList;
+    List<bool> creatureTrapped;         //tracks when creatures land in traps.
 	List<GameObject> treeList;         //not sure how to use these yet
 	List<GameObject> trapList;
     List<Vector2> trapPositions;            //needed to destroy traps when necessary.
@@ -130,7 +132,7 @@ public class Game : MonoBehaviour
         creatureRow = new List<int>();
         creatureCol = new List<int>();
 
-        objManager = new GameObjectManager();
+        //objManager = new GameObjectManager();
         player = new GameObject();
 
         mapArray = new string[MAX_ROWS, MAX_COLS];
@@ -146,6 +148,7 @@ public class Game : MonoBehaviour
         initObjList = new List<string>();
 
         creatureList = new List<GameObject>();
+        creatureTrapped = new List<bool>();
         treeList = new List<GameObject>();
         trapList = new List<GameObject>();
         destinationList = new List<Vector2>();
@@ -184,7 +187,7 @@ public class Game : MonoBehaviour
                     //Debug.Log("MapArray value at " + playerRow + ", " + (playerCol - 1) + ": " + mapArray[playerRow, playerCol - 1]);
 
                     //update player position in array
-                    objectArray[playerRow, playerCol] = "0";
+                    objectArray[playerRow, playerCol] = EMPTY;
                     playerCol--;
                     objectArray[playerRow, playerCol] = PLAYER;
                     playerDestination = new Vector2(player.transform.position.x - 1, player.transform.position.y);
@@ -200,7 +203,7 @@ public class Game : MonoBehaviour
                         if (creatureCol[i] < MAX_COLS - 1 && !objectArray[creatureRow[i], creatureCol[i] + 1].Equals(TREE) && !objectArray[creatureRow[i], creatureCol[i] + 1].Equals(CREATURE)
                             && mapArray[creatureRow[i], creatureCol[i] + 1].Equals(LAND))
                         {                               
-                            objectArray[creatureRow[i], creatureCol[i]] = "0";
+                            objectArray[creatureRow[i], creatureCol[i]] = EMPTY;
                             creatureCol[i]++;
                             objectArray[creatureRow[i], creatureCol[i]] = CREATURE;
                             destinationList[i] = new Vector2(creature.transform.position.x + 1, creature.transform.position.y);
@@ -222,7 +225,7 @@ public class Game : MonoBehaviour
                    // Debug.Log("ObjectArray value at " + playerRow + ", " + (playerCol + 1) + ": " + objectArray[playerRow, playerCol + 1]);
                     //Debug.Log("MapArray value at " + playerRow + ", " + (playerCol + 1) + ": " + mapArray[playerRow, playerCol + 1]);
 
-                    objectArray[playerRow, playerCol] = "0";
+                    objectArray[playerRow, playerCol] = EMPTY;
                     playerCol++;
                     objectArray[playerRow, playerCol] = PLAYER;
                     playerDestination = new Vector2(player.transform.position.x + 1, player.transform.position.y);
@@ -239,7 +242,13 @@ public class Game : MonoBehaviour
                         if (creatureCol[i] > 0 && !objectArray[creatureRow[i], creatureCol[i] - 1].Equals(TREE) && !objectArray[creatureRow[i], creatureCol[i] - 1].Equals(CREATURE)
                             && mapArray[creatureRow[i], creatureCol[i] - 1].Equals(LAND))
                         {
-                            objectArray[creatureRow[i], creatureCol[i]] = "0";
+                            //are they on a trap?
+                            if (objectArray[creatureRow[i], creatureCol[i] - 1].Equals(TRAP))
+                            {
+                                creatureTrapped[i] = true;
+                            }
+
+                            objectArray[creatureRow[i], creatureCol[i]] = EMPTY;
                             creatureCol[i]--;
                             objectArray[creatureRow[i], creatureCol[i]] = CREATURE;
                             destinationList[i] = new Vector2(creature.transform.position.x - 1, creature.transform.position.y);
@@ -256,7 +265,7 @@ public class Game : MonoBehaviour
                    // Debug.Log("ObjectArray value at " + (playerRow - 1) + ", " + playerCol + ": " + objectArray[playerRow - 1, playerCol]);
                     //Debug.Log("MapArray value at " + (playerRow - 1) + ", " + playerCol + ": " + mapArray[playerRow - 1, playerCol]);
 
-                    objectArray[playerRow, playerCol] = "0";
+                    objectArray[playerRow, playerCol] = EMPTY;
                     playerRow--;
                     objectArray[playerRow, playerCol] = PLAYER;
                     playerDestination = new Vector2(player.transform.position.x, player.transform.position.y + 1);
@@ -272,7 +281,7 @@ public class Game : MonoBehaviour
                         if (creatureRow[i] < MAX_ROWS - 1 && !objectArray[creatureRow[i] + 1, creatureCol[i]].Equals(TREE) && !objectArray[creatureRow[i] + 1, creatureCol[i]].Equals(CREATURE)
                             && mapArray[creatureRow[i] + 1, creatureCol[i]].Equals(LAND))
                         {
-                            objectArray[creatureRow[i], creatureCol[i]] = "0";
+                            objectArray[creatureRow[i], creatureCol[i]] = EMPTY;
                             creatureRow[i]++;
                             objectArray[creatureRow[i], creatureCol[i]] = CREATURE;
                             destinationList[i] = new Vector2(creature.transform.position.x, creature.transform.position.y - 1);
@@ -289,7 +298,7 @@ public class Game : MonoBehaviour
                    // Debug.Log("ObjectArray value at " + (playerRow + 1) + ", " + playerCol + ": " + objectArray[playerRow + 1, playerCol]);
                    // Debug.Log("MapArray value at " + (playerRow + 1) + ", " + playerCol + ": " + mapArray[playerRow + 1, playerCol]);
 
-                    objectArray[playerRow, playerCol] = "0";
+                    objectArray[playerRow, playerCol] = EMPTY;
                     playerRow++;
                     objectArray[playerRow, playerCol] = PLAYER;
                     playerDestination = new Vector2(player.transform.position.x, player.transform.position.y - 1);
@@ -305,7 +314,7 @@ public class Game : MonoBehaviour
                         if (creatureRow[i] > 0 && !objectArray[creatureRow[i] - 1, creatureCol[i]].Equals(TREE) && !objectArray[creatureRow[i] - 1, creatureCol[i]].Equals(CREATURE)
                             && mapArray[creatureRow[i] - 1, creatureCol[i]].Equals(LAND))
                         {
-                            objectArray[creatureRow[i], creatureCol[i]] = "0";
+                            objectArray[creatureRow[i], creatureCol[i]] = EMPTY;
                             creatureRow[i]--;
                             objectArray[creatureRow[i], creatureCol[i]] = CREATURE;
                             destinationList[i] = new Vector2(creature.transform.position.x, creature.transform.position.y + 1);
@@ -510,6 +519,7 @@ public class Game : MonoBehaviour
                         destinationList.Add(creature.transform.position);// new Vector2((float)col + xOffset, yOffset - (float)row));
                         creatureRow.Add(row);
                         creatureCol.Add(col);
+                        creatureTrapped.Add(false);
                         //Debug.Log("Creature's Starting Pos: " + destinationList[0]); //creaturePrefab.transform.position);
                         break;
 
@@ -659,7 +669,39 @@ public class Game : MonoBehaviour
 
                 }
             }
+            else
+            {
+                //creature is at current destination. Check if they're standing on a trap.
+                if (creatureTrapped[i])
+                {
+                    //remove creature and trap at current position
+                    Debug.Log("Removing creature " + i + " at " + creature.transform.position);
+                    creatureTrapped.RemoveAt(i);
+                    objectArray[creatureRow[i], creatureCol[i]] = EMPTY;
+                    Destroy(creatureList[i]);
+                    creatureList.Remove(creature);
+                    creatureRow.RemoveAt(i);
+                    creatureCol.RemoveAt(i);
+                    //trapList.RemoveAt(i);
+                    //trapPositions.RemoveAt(i);
+                    destinationList.RemoveAt(i);
+                    
+                }
+            }
         }
        
+    }
+
+    void RemoveTrap(Vector2 targetPos)
+    {
+        foreach(GameObject trap in trapList)
+        {
+            int i = trapList.IndexOf(trap);
+            if (trap.transform.position.x == targetPos.x && trap.transform.position.y == targetPos.y)
+            {
+                //destroy trap and remove from list.
+                Destroy(trapList[i]);
+            }
+        }
     }
 }
