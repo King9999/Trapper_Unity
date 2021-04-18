@@ -18,6 +18,7 @@ public class Game : MonoBehaviour
     bool controlLocked;     //prevents any player input during win screen.
     int waitTimer;          //used to delay screen changes in frames.
     public UI ui;           //need this to make changes to UI such as stage number or lives.
+    public AudioSource audioSource;
 
     //GameObjectManager objManager;       //used to create the level objects and tiles at runtime.
     GameObject player;                  //used to create a player at runtime so that I can get their position and move them when necessary.
@@ -60,6 +61,9 @@ public class Game : MonoBehaviour
     const float MOVE_SPEED = 4f;      //will be affected by deltaTime
 	const int MAX_LEVEL = 10;
     public TextAsset levelFile;
+    const float MAP_LAYER = 1;
+    const float TRAP_LAYER = 0;         //want creatures and player to appear to be on top of a trap when they step on it.
+    const float OBJECT_LAYER = -1;
 
     //map tiles
     const string WATER = "0";
@@ -105,6 +109,7 @@ public class Game : MonoBehaviour
     //creatures & objects
     List<GameObject> creatureList;
     List<bool> creatureTrapped;         //tracks when creatures land in traps.
+    List<Vector2> creatureTrapLocations;        //tracks which creatures are trapped.
 	List<GameObject> treeList;         //not sure how to use these yet
 	List<GameObject> trapList;
     List<Vector2> trapPositions;            //needed to destroy traps when necessary.
@@ -149,10 +154,11 @@ public class Game : MonoBehaviour
 
         creatureList = new List<GameObject>();
         creatureTrapped = new List<bool>();
+        creatureTrapLocations = new List<Vector2>();
         treeList = new List<GameObject>();
         trapList = new List<GameObject>();
         destinationList = new List<Vector2>();
-        trapPositions = new List<Vector2>();
+        //trapPositions = new List<Vector2>();
         treePositions = new List<Vector2>();
 
         ui.SetLivesText(playerLives);
@@ -169,6 +175,9 @@ public class Game : MonoBehaviour
     {
         CheckForInput();
         UpdateObjects();
+
+        if (creatureTrapLocations.Count > 0)
+            RemoveCreatures();
     }
 
     //All user input is checked here. Must go into Update method
@@ -245,7 +254,8 @@ public class Game : MonoBehaviour
                             //are they on a trap?
                             if (objectArray[creatureRow[i], creatureCol[i] - 1].Equals(TRAP))
                             {
-                                creatureTrapped[i] = true;
+                                //creatureTrapped[i] = true;
+                                //creatureTrapLocations.Add(creature.transform.position);
                             }
 
                             objectArray[creatureRow[i], creatureCol[i]] = EMPTY;
@@ -415,68 +425,68 @@ public class Game : MonoBehaviour
                     
                     case WATER:
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/tile_water"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
-                        Instantiate(waterPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, 0), new Quaternion(0, 0, 0, 0));
+                        Instantiate(waterPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
                         //Debug.Log("Water Location: " + waterObj.transform.position);
                         break;
 
                     case LAND:
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/tile_land"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
-                        Instantiate(landPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, 0), new Quaternion(0, 0, 0, 0));
+                        Instantiate(landPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
                         break;
 
                     case LAND_BOTTOM:
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_bottom"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
-                        Instantiate(landBottomPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, 0), new Quaternion(0, 0, 0, 0));
+                        Instantiate(landBottomPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
                         break;
 
                     case LAND_TOP:
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_top"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
-                        Instantiate(landTopPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, 0), new Quaternion(0, 0, 0, 0));
+                        Instantiate(landTopPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
                         break;
 
                     case LAND_LEFT:
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_left"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
-                        Instantiate(landLeftPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, 0), new Quaternion(0, 0, 0, 0));
+                        Instantiate(landLeftPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
                         break;
 
                     case LAND_RIGHT:
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_right"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
-                        Instantiate(landRightPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, 0), new Quaternion(0, 0, 0, 0));
+                        Instantiate(landRightPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
                         break;
 
                     case LAND_UPLEFT:
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_upperleft"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
-                        Instantiate(landTopLeftPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, 0), new Quaternion(0, 0, 0, 0));
+                        Instantiate(landTopLeftPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
                         break;
 
                     case LAND_UPRIGHT:  //TODO: Does not display correctly normally. Had to switch the orignial values to get it to work.
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_upperright"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
-                        Instantiate(landTopRightPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, 0), new Quaternion(0, 0, 0, 0));
+                        Instantiate(landTopRightPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
                         break;
 
                     case LAND_BTMLEFT:
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_bottomleft"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
-                        Instantiate(landBottomLeftPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, 0), new Quaternion(0, 0, 0, 0));
+                        Instantiate(landBottomLeftPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
                         break;
 
                     case LAND_BTMRIGHT: //TODO: Does not display correctly normally. Had to switch the orignial values to get it to work.
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_bottomright"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
-                        Instantiate(landBottomRightPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, 0), new Quaternion(0, 0, 0, 0));
+                        Instantiate(landBottomRightPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
                         break;
 
                     case LAND_TOPBTM:
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_topbottom"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
-                        Instantiate(landTopBottomPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, 0), new Quaternion(0, 0, 0, 0));
+                        Instantiate(landTopBottomPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
                         break;
 
                     case LAND_TOPBTMLEFT:
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_topbottomleft"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
-                        Instantiate(landTopBottomLeftPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, 0), new Quaternion(0, 0, 0, 0));
+                        Instantiate(landTopBottomLeftPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
                         break;
 
                     case LAND_TOPBTMRIGHT:
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_topbottomright"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
-                        Instantiate(landTopBottomRightPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, 0), new Quaternion(0, 0, 0, 0));
+                        Instantiate(landTopBottomRightPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
                         break;
 
                     default:
@@ -504,17 +514,17 @@ public class Game : MonoBehaviour
                 {
 
                     case TREE:
-                        //objManager.SetupObject(obj, Resources.Load<Sprite>("Objects/tree"), new Vector3((float)col + xOffset, (float)row + yOffset, -1));
+                        //objManager.SetupObject(obj, Resources.Load<Sprite>("Objects/tree"), new Vector3((float)col + xOffset, (float)row + yOffset, OBJECT_LAYER));
                         //obj.name = "Tree";
-                        Instantiate(treePrefab, new Vector3((float)col + xOffset, yOffset - (float)row, -1), new Quaternion(0, 0, 0, 0));
+                        Instantiate(treePrefab, new Vector3((float)col + xOffset, yOffset - (float)row, OBJECT_LAYER), new Quaternion(0, 0, 0, 0));
                         //treeList.Add(treePrefab);
                         //treePositions.Add(new Vector2((float)col + xOffset, yOffset - (float)row));
                         break;
 
                     case CREATURE:
-                        //objManager.SetupObject(obj, Resources.Load<Sprite>("Objects/creature_down"), new Vector3((float)col + xOffset, (float)row + yOffset, -1));
+                        //objManager.SetupObject(obj, Resources.Load<Sprite>("Objects/creature_down"), new Vector3((float)col + xOffset, (float)row + yOffset, OBJECT_LAYER));
                         //obj.name = "Creature";
-                        GameObject creature = Instantiate(creaturePrefab, new Vector3((float)col + xOffset, yOffset - (float)row, -1), new Quaternion(0, 0, 0, 0));
+                        GameObject creature = Instantiate(creaturePrefab, new Vector3((float)col + xOffset, yOffset - (float)row, OBJECT_LAYER), new Quaternion(0, 0, 0, 0));
                         creatureList.Add(creature);
                         destinationList.Add(creature.transform.position);// new Vector2((float)col + xOffset, yOffset - (float)row));
                         creatureRow.Add(row);
@@ -524,17 +534,17 @@ public class Game : MonoBehaviour
                         break;
 
                     case TRAP:
-                        //objManager.SetupObject(obj, Resources.Load<Sprite>("Objects/trap"), new Vector3((float)col + xOffset, (float)row + yOffset, -1));
+                        //objManager.SetupObject(obj, Resources.Load<Sprite>("Objects/trap"), new Vector3((float)col + xOffset, (float)row + yOffset, OBJECT_LAYER));
                         //obj.name = "Trap";
-                        GameObject trap = Instantiate(trapPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, -1), new Quaternion(0, 0, 0, 0));
+                        GameObject trap = Instantiate(trapPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, TRAP_LAYER), new Quaternion(0, 0, 0, 0));
                         trapList.Add(trap);
-                        trapPositions.Add(trap.transform.position);// new Vector2((float)col + xOffset, yOffset - (float)row));
+                        //trapPositions.Add(trap.transform.position);// new Vector2((float)col + xOffset, yOffset - (float)row));
                         break;
 
                     case PLAYER:
-                        //objManager.SetupObject(player, Resources.Load<Sprite>("Objects/player_down"), new Vector3((float)col + xOffset, yOffset - (float)row, -1));
+                        //objManager.SetupObject(player, Resources.Load<Sprite>("Objects/player_down"), new Vector3((float)col + xOffset, yOffset - (float)row, OBJECT_LAYER));
                         //player.name = "Player";
-                        player = Instantiate(playerPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, -1), new Quaternion(0, 0, 0, 0));
+                        player = Instantiate(playerPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, OBJECT_LAYER), new Quaternion(0, 0, 0, 0));
                         playerDestination = player.transform.position; // new Vector2((float)col + xOffset, yOffset - (float)row);
                         //Debug.Log("Starting Player Pos: " + playerDestination);
                         playerRow = row;
@@ -567,11 +577,11 @@ public class Game : MonoBehaviour
             float posDiffX = playerDestination.x - player.transform.position.x;
             if (posDiffX > 0 && posDiffX < 0.05f)
             {
-                player.transform.position = new Vector3(playerDestination.x, player.transform.position.y, -1);
+                player.transform.position = new Vector3(playerDestination.x, player.transform.position.y, OBJECT_LAYER);
             }
             else
             {
-                player.transform.position = new Vector3(player.transform.position.x + (MOVE_SPEED * Time.deltaTime), player.transform.position.y, -1);
+                player.transform.position = new Vector3(player.transform.position.x + (MOVE_SPEED * Time.deltaTime), player.transform.position.y, OBJECT_LAYER);
                 //TODO: while player is moving, player sprite animates
             }
 
@@ -580,9 +590,9 @@ public class Game : MonoBehaviour
         {
             float posDiffX = player.transform.position.x - playerDestination.x;
             if (posDiffX > 0 && posDiffX < 0.05f)
-                player.transform.position = new Vector3(playerDestination.x, player.transform.position.y, -1);
+                player.transform.position = new Vector3(playerDestination.x, player.transform.position.y, OBJECT_LAYER);
             else
-                player.transform.position = new Vector3(player.transform.position.x - (MOVE_SPEED * Time.deltaTime), player.transform.position.y, -1);
+                player.transform.position = new Vector3(player.transform.position.x - (MOVE_SPEED * Time.deltaTime), player.transform.position.y, OBJECT_LAYER);
            
         }
         else if (player.transform.position.y < playerDestination.y) //player moves up
@@ -591,16 +601,16 @@ public class Game : MonoBehaviour
             if (posDiffY > 0 && posDiffY < 0.05f)
                 player.transform.position = new Vector3(player.transform.position.x, playerDestination.y, - 1);
             else
-                player.transform.position = new Vector3(player.transform.position.x, player.transform.position.y + (MOVE_SPEED * Time.deltaTime), -1);
+                player.transform.position = new Vector3(player.transform.position.x, player.transform.position.y + (MOVE_SPEED * Time.deltaTime), OBJECT_LAYER);
 
         }
         else if (player.transform.position.y > playerDestination.y) //player moves down
         {
             float posDiffY = player.transform.position.y - playerDestination.y;
             if (posDiffY > 0 && posDiffY < 0.05f)
-                player.transform.position = new Vector3(player.transform.position.x, playerDestination.y, -1);
+                player.transform.position = new Vector3(player.transform.position.x, playerDestination.y, OBJECT_LAYER);
             else
-                player.transform.position = new Vector3(player.transform.position.x, player.transform.position.y - (MOVE_SPEED * Time.deltaTime), -1);
+                player.transform.position = new Vector3(player.transform.position.x, player.transform.position.y - (MOVE_SPEED * Time.deltaTime), OBJECT_LAYER);
 
         }
         else //at current destination
@@ -622,11 +632,11 @@ public class Game : MonoBehaviour
                 float posDiffX = destinationList[i].x - creature.transform.position.x;
                 if (posDiffX > 0 && posDiffX < 0.05f)
                 {
-                    creature.transform.position = new Vector3(destinationList[i].x, creature.transform.position.y, -1);
+                    creature.transform.position = new Vector3(destinationList[i].x, creature.transform.position.y, OBJECT_LAYER);
                 }
                 else
                 {
-                    creature.transform.position = new Vector3(creature.transform.position.x + (MOVE_SPEED * Time.deltaTime), creature.transform.position.y, -1);
+                    creature.transform.position = new Vector3(creature.transform.position.x + (MOVE_SPEED * Time.deltaTime), creature.transform.position.y, OBJECT_LAYER);
 
                 }
             }
@@ -635,11 +645,11 @@ public class Game : MonoBehaviour
                 float posDiffX = creature.transform.position.x - destinationList[i].x;
                 if (posDiffX > 0 && posDiffX < 0.05f)
                 {
-                    creature.transform.position = new Vector3(destinationList[i].x, creature.transform.position.y, -1);
+                    creature.transform.position = new Vector3(destinationList[i].x, creature.transform.position.y, OBJECT_LAYER);
                 }
                 else
                 {
-                    creature.transform.position = new Vector3(creature.transform.position.x - (MOVE_SPEED * Time.deltaTime), creature.transform.position.y, -1);
+                    creature.transform.position = new Vector3(creature.transform.position.x - (MOVE_SPEED * Time.deltaTime), creature.transform.position.y, OBJECT_LAYER);
 
                 }
             }
@@ -648,11 +658,11 @@ public class Game : MonoBehaviour
                 float posDiffY = destinationList[i].y - creature.transform.position.y;
                 if (posDiffY > 0 && posDiffY < 0.05f)
                 {
-                    creature.transform.position = new Vector3(creature.transform.position.x, destinationList[i].y, -1);
+                    creature.transform.position = new Vector3(creature.transform.position.x, destinationList[i].y, OBJECT_LAYER);
                 }
                 else
                 {
-                    creature.transform.position = new Vector3(creature.transform.position.x, creature.transform.position.y + (MOVE_SPEED * Time.deltaTime), -1);
+                    creature.transform.position = new Vector3(creature.transform.position.x, creature.transform.position.y + (MOVE_SPEED * Time.deltaTime), OBJECT_LAYER);
 
                 }
             }
@@ -661,32 +671,43 @@ public class Game : MonoBehaviour
                 float posDiffY = creature.transform.position.y - destinationList[i].y;
                 if (posDiffY > 0 && posDiffY < 0.05f)
                 {
-                    creature.transform.position = new Vector3(creature.transform.position.x, destinationList[i].y, -1);
+                    creature.transform.position = new Vector3(creature.transform.position.x, destinationList[i].y, OBJECT_LAYER);
                 }
                 else
                 {
-                    creature.transform.position = new Vector3(creature.transform.position.x, creature.transform.position.y - (MOVE_SPEED * Time.deltaTime), -1);
+                    creature.transform.position = new Vector3(creature.transform.position.x, creature.transform.position.y - (MOVE_SPEED * Time.deltaTime), OBJECT_LAYER);
 
                 }
             }
             else
             {
                 //creature is at current destination. Check if they're standing on a trap.
-                if (creatureTrapped[i])
+                for (int j = 0; j < trapList.Count; j++)
+                {
+                    if (creature.transform.position.x == trapList[j].transform.position.x && creature.transform.position.y == trapList[j].transform.position.y)
+                        creatureTrapLocations.Add(creature.transform.position);
+                }
+                /*if (creatureTrapped[i])
                 {
                     //remove creature and trap at current position
                     Debug.Log("Removing creature " + i + " at " + creature.transform.position);
-                    creatureTrapped.RemoveAt(i);
+                    
                     objectArray[creatureRow[i], creatureCol[i]] = EMPTY;
+
+                    //creature must be destroyed before the trap, otherwise the creature will remain when trap is gone.
                     Destroy(creatureList[i]);
+                    //creatureList[i].SetActive(false);
+                    RemoveTrap(creature.transform.position);
+                                       
                     creatureList.Remove(creature);
                     creatureRow.RemoveAt(i);
                     creatureCol.RemoveAt(i);
                     //trapList.RemoveAt(i);
                     //trapPositions.RemoveAt(i);
                     destinationList.RemoveAt(i);
-                    
-                }
+                    creatureTrapped.RemoveAt(i);
+
+                }*/
             }
         }
        
@@ -700,8 +721,56 @@ public class Game : MonoBehaviour
             if (trap.transform.position.x == targetPos.x && trap.transform.position.y == targetPos.y)
             {
                 //destroy trap and remove from list.
+                Debug.Log("Removing trap " + i + " at " + trap.transform.position);
                 Destroy(trapList[i]);
+                //trapList[i].SetActive(false);
+                trapList.Remove(trap);
             }
         }
+    }
+
+    void RemoveCreatures()
+    {
+        /*IMPORTANT NOTE: when destroying objects, do not use foreach loops as Unity will try to use an object that no longer exists on the next iteration. */
+        
+        //NOTE: creature must be destroyed before trap
+        for (int i = 0; i < creatureList.Count; i++)// GameObject creature in creatureList)
+        {
+            //int i = creatureList.IndexOf(creature);
+
+            for (int j = 0; j < creatureTrapLocations.Count; j++)
+            {
+                if (creatureList[i].transform.position.x == creatureTrapLocations[j].x && creatureList[i].transform.position.y == creatureTrapLocations[j].y)
+                {
+                    //destroy trap and remove from list.
+                    Debug.Log("Removing creature " + i + " at " + creatureList[i].transform.position);
+                    Destroy(creatureList[i]);
+                    //trapList[i].SetActive(false);
+                    creatureList.RemoveAt(i);
+                    creatureRow.RemoveAt(i);
+                    creatureCol.RemoveAt(i);
+                    destinationList.RemoveAt(i);
+                }
+            }
+        }
+
+        for (int i = 0; i < trapList.Count; i++)
+        {
+            for (int j = 0; j < creatureTrapLocations.Count; j++)
+            {
+                if (trapList[i].transform.position.x == creatureTrapLocations[j].x && trapList[i].transform.position.y == creatureTrapLocations[j].y)
+                {
+                    //destroy trap and remove from list.
+                    Debug.Log("Removing trap " + i + " at " + trapList[i].transform.position);
+                    Destroy(trapList[i]);
+                    //trapList[i].SetActive(false);
+                    trapList.RemoveAt(i);
+
+                    //Update the trapped creatures list. It's fine to do this here because creature was already removed
+                    creatureTrapLocations.RemoveAt(j);
+                }
+            }
+        }
+
     }
 }
