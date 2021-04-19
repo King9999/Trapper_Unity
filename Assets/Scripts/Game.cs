@@ -19,6 +19,7 @@ public class Game : MonoBehaviour
     int waitTimer;          //used to delay screen changes in frames.
     public UI ui;           //need this to make changes to UI such as stage number or lives.
     public AudioSource audioSource;
+    public AudioClip audioFall;
 
     //GameObjectManager objManager;       //used to create the level objects and tiles at runtime.
     GameObject player;                  //used to create a player at runtime so that I can get their position and move them when necessary.
@@ -110,10 +111,10 @@ public class Game : MonoBehaviour
     List<GameObject> creatureList;
     List<bool> creatureTrapped;         //tracks when creatures land in traps.
     List<Vector2> creatureTrapLocations;        //tracks which creatures are trapped.
-	List<GameObject> treeList;         //not sure how to use these yet
+	//List<GameObject> treeList;         //not sure how to use these yet
 	List<GameObject> trapList;
-    List<Vector2> trapPositions;            //needed to destroy traps when necessary.
-    List<Vector2> treePositions;            //needed to check for collision
+    //List<Vector2> trapPositions;            //needed to destroy traps when necessary.
+    //List<Vector2> treePositions;            //needed to check for collision
 	List<Vector2> destinationList;		    //contains list of creature destinations on map.
     List<int> creatureRow;                 
     List<int> creatureCol;                   //tracks each creature's position in the object array.
@@ -155,11 +156,11 @@ public class Game : MonoBehaviour
         creatureList = new List<GameObject>();
         creatureTrapped = new List<bool>();
         creatureTrapLocations = new List<Vector2>();
-        treeList = new List<GameObject>();
+        //treeList = new List<GameObject>();
         trapList = new List<GameObject>();
         destinationList = new List<Vector2>();
         //trapPositions = new List<Vector2>();
-        treePositions = new List<Vector2>();
+        //treePositions = new List<Vector2>();
 
         ui.SetLivesText(playerLives);
         ui.SetStageText(level);
@@ -175,6 +176,14 @@ public class Game : MonoBehaviour
     {
         CheckForInput();
         UpdateObjects();
+
+        if (playerDead)
+        {
+            ResetLevel();
+            playerLives--;
+            ui.SetLivesText(playerLives);
+            playerDead = false;          
+        }
 
         if (creatureTrapLocations.Count > 0)
             RemoveCreatures();
@@ -251,13 +260,7 @@ public class Game : MonoBehaviour
                         if (creatureCol[i] > 0 && !objectArray[creatureRow[i], creatureCol[i] - 1].Equals(TREE) && !objectArray[creatureRow[i], creatureCol[i] - 1].Equals(CREATURE)
                             && mapArray[creatureRow[i], creatureCol[i] - 1].Equals(LAND))
                         {
-                            //are they on a trap?
-                            if (objectArray[creatureRow[i], creatureCol[i] - 1].Equals(TRAP))
-                            {
-                                //creatureTrapped[i] = true;
-                                //creatureTrapLocations.Add(creature.transform.position);
-                            }
-
+                        
                             objectArray[creatureRow[i], creatureCol[i]] = EMPTY;
                             creatureCol[i]--;
                             objectArray[creatureRow[i], creatureCol[i]] = CREATURE;
@@ -516,7 +519,8 @@ public class Game : MonoBehaviour
                     case TREE:
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Objects/tree"), new Vector3((float)col + xOffset, (float)row + yOffset, OBJECT_LAYER));
                         //obj.name = "Tree";
-                        Instantiate(treePrefab, new Vector3((float)col + xOffset, yOffset - (float)row, OBJECT_LAYER), new Quaternion(0, 0, 0, 0));
+                        if (!playerDead)    //this is here so that trees aren't instantiated again when the level is reset.
+                            Instantiate(treePrefab, new Vector3((float)col + xOffset, yOffset - (float)row, OBJECT_LAYER), new Quaternion(0, 0, 0, 0));
                         //treeList.Add(treePrefab);
                         //treePositions.Add(new Vector2((float)col + xOffset, yOffset - (float)row));
                         break;
@@ -617,8 +621,20 @@ public class Game : MonoBehaviour
         {
             controlLocked = false;
             //TODO: stop sprite animation
-            
-            //Debug.Log("At current destination: " + player.transform.position);
+            //TODO: check if player is on trap or creature
+            int i = 0;
+            while (!playerDead && i < trapList.Count)
+            {
+                if (player.transform.position.x == trapList[i].transform.position.x && player.transform.position.y == trapList[i].transform.position.y)
+                {
+                    audioSource.PlayOneShot(audioFall);
+                    playerDead = true;
+                }
+                else
+                    i++;
+            }
+
+           // Debug.Log("At current destination: " + player.transform.position);
         }
 
         /****************CREATURE MOVEMENT*******************/
@@ -687,65 +703,29 @@ public class Game : MonoBehaviour
                     if (creature.transform.position.x == trapList[j].transform.position.x && creature.transform.position.y == trapList[j].transform.position.y)
                         creatureTrapLocations.Add(creature.transform.position);
                 }
-                /*if (creatureTrapped[i])
-                {
-                    //remove creature and trap at current position
-                    Debug.Log("Removing creature " + i + " at " + creature.transform.position);
-                    
-                    objectArray[creatureRow[i], creatureCol[i]] = EMPTY;
-
-                    //creature must be destroyed before the trap, otherwise the creature will remain when trap is gone.
-                    Destroy(creatureList[i]);
-                    //creatureList[i].SetActive(false);
-                    RemoveTrap(creature.transform.position);
-                                       
-                    creatureList.Remove(creature);
-                    creatureRow.RemoveAt(i);
-                    creatureCol.RemoveAt(i);
-                    //trapList.RemoveAt(i);
-                    //trapPositions.RemoveAt(i);
-                    destinationList.RemoveAt(i);
-                    creatureTrapped.RemoveAt(i);
-
-                }*/
+               
             }
         }
        
     }
 
-    void RemoveTrap(Vector2 targetPos)
-    {
-        foreach(GameObject trap in trapList)
-        {
-            int i = trapList.IndexOf(trap);
-            if (trap.transform.position.x == targetPos.x && trap.transform.position.y == targetPos.y)
-            {
-                //destroy trap and remove from list.
-                Debug.Log("Removing trap " + i + " at " + trap.transform.position);
-                Destroy(trapList[i]);
-                //trapList[i].SetActive(false);
-                trapList.Remove(trap);
-            }
-        }
-    }
 
     void RemoveCreatures()
     {
         /*IMPORTANT NOTE: when destroying objects, do not use foreach loops as Unity will try to use an object that no longer exists on the next iteration. */
         
         //NOTE: creature must be destroyed before trap
-        for (int i = 0; i < creatureList.Count; i++)// GameObject creature in creatureList)
+        for (int i = 0; i < creatureList.Count; i++)
         {
-            //int i = creatureList.IndexOf(creature);
-
+            
             for (int j = 0; j < creatureTrapLocations.Count; j++)
             {
                 if (creatureList[i].transform.position.x == creatureTrapLocations[j].x && creatureList[i].transform.position.y == creatureTrapLocations[j].y)
                 {
                     //destroy trap and remove from list.
                     Debug.Log("Removing creature " + i + " at " + creatureList[i].transform.position);
+                    audioSource.PlayOneShot(audioFall);
                     Destroy(creatureList[i]);
-                    //trapList[i].SetActive(false);
                     creatureList.RemoveAt(i);
                     creatureRow.RemoveAt(i);
                     creatureCol.RemoveAt(i);
@@ -763,7 +743,6 @@ public class Game : MonoBehaviour
                     //destroy trap and remove from list.
                     Debug.Log("Removing trap " + i + " at " + trapList[i].transform.position);
                     Destroy(trapList[i]);
-                    //trapList[i].SetActive(false);
                     trapList.RemoveAt(i);
 
                     //Update the trapped creatures list. It's fine to do this here because creature was already removed
@@ -772,5 +751,27 @@ public class Game : MonoBehaviour
             }
         }
 
+    }
+
+    void ResetLevel()
+    {
+        //clear all objects and rebuild level.
+        for (int i = 0; i < trapList.Count; i++)
+            Destroy(trapList[i]);
+       
+        for (int i = 0; i < creatureList.Count; i++)
+            Destroy(creatureList[i]);
+
+        trapList.Clear();
+        creatureList.Clear();
+        creatureRow.Clear();
+        creatureCol.Clear();
+        destinationList.Clear();
+        creatureTrapped.Clear();
+
+        Destroy(player);
+
+        objectArray = (string[,])initObjArray.Clone();
+        BuildObjects(objectArray);
     }
 }
