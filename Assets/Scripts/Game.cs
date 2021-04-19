@@ -10,14 +10,20 @@ public class Game : MonoBehaviour
 {
     //UI and game states
     int score;
-    public int level;
+    public UI ui;           //need this to make changes to UI such as stage number or lives.
     int levelIndex;         //used to navigate levels in XML file.
+
+    [Header("Level Info")]
+    public TextAsset levelFile;
+    public int level;
+    public int playerLives;
     int enemyCount;         //current # of uncaptured creatures remaining.
     int enemyTotal;
     bool gameOver;
     bool controlLocked;     //prevents any player input during win screen.
     int waitTimer;          //used to delay screen changes in frames.
-    public UI ui;           //need this to make changes to UI such as stage number or lives.
+
+    [Header("Audio & Animation")]
     public AudioSource audioSource;
     public AudioClip audioFall;
     public Animator transition;
@@ -64,7 +70,7 @@ public class Game : MonoBehaviour
 	const int TILE_SIZE = 64;
     const float MOVE_SPEED = 4f;      //will be affected by deltaTime
 	const int MAX_LEVEL = 10;
-    public TextAsset levelFile;
+    
     const float MAP_LAYER = 1;
     const float TRAP_LAYER = 0;         //want creatures and player to appear to be on top of a trap when they step on it.
     const float OBJECT_LAYER = -1;
@@ -105,7 +111,7 @@ public class Game : MonoBehaviour
 
     //player data
     bool playerDead;
-    public int playerLives;
+    
     Vector2 playerDestination;  //used to move player to new spot on map.
     int playerDirection;
     int frameAdvance;           //used to change animation frames.
@@ -204,6 +210,9 @@ public class Game : MonoBehaviour
                     //Debug.Log("ObjectArray value at " + playerRow + ", " + (playerCol - 1) + ": " + objectArray[playerRow, playerCol - 1]);
                     //Debug.Log("MapArray value at " + playerRow + ", " + (playerCol - 1) + ": " + mapArray[playerRow, playerCol - 1]);
 
+                    //update player animation
+                    player.GetComponent<Animator>().SetTrigger("Left");
+
                     //update player position in array
                     objectArray[playerRow, playerCol] = EMPTY;
                     playerCol--;
@@ -240,9 +249,11 @@ public class Game : MonoBehaviour
                 if (playerCol < MAX_COLS - 1 && !objectArray[playerRow, playerCol + 1].Equals(TREE) && mapArray[playerRow, playerCol + 1].Equals(LAND))
                 {
                     //Debug.Log("Player Row: " + playerRow + " Player Col: " + playerCol);
-                   // Debug.Log("ObjectArray value at " + playerRow + ", " + (playerCol + 1) + ": " + objectArray[playerRow, playerCol + 1]);
+                    // Debug.Log("ObjectArray value at " + playerRow + ", " + (playerCol + 1) + ": " + objectArray[playerRow, playerCol + 1]);
                     //Debug.Log("MapArray value at " + playerRow + ", " + (playerCol + 1) + ": " + mapArray[playerRow, playerCol + 1]);
 
+                    //update player animation
+                    player.GetComponent<Animator>().SetTrigger("Right");
                     objectArray[playerRow, playerCol] = EMPTY;
                     playerCol++;
                     objectArray[playerRow, playerCol] = PLAYER;
@@ -275,9 +286,11 @@ public class Game : MonoBehaviour
                 if (playerRow > 0 && !objectArray[playerRow - 1, playerCol].Equals(TREE) && mapArray[playerRow - 1, playerCol].Equals(LAND))
                 {
                     //Debug.Log("Player Row: " + playerRow + " Player Col: " + playerCol);
-                   // Debug.Log("ObjectArray value at " + (playerRow - 1) + ", " + playerCol + ": " + objectArray[playerRow - 1, playerCol]);
+                    // Debug.Log("ObjectArray value at " + (playerRow - 1) + ", " + playerCol + ": " + objectArray[playerRow - 1, playerCol]);
                     //Debug.Log("MapArray value at " + (playerRow - 1) + ", " + playerCol + ": " + mapArray[playerRow - 1, playerCol]);
 
+                    //update player animation
+                    player.GetComponent<Animator>().SetTrigger("Up");
                     objectArray[playerRow, playerCol] = EMPTY;
                     playerRow--;
                     objectArray[playerRow, playerCol] = PLAYER;
@@ -308,9 +321,11 @@ public class Game : MonoBehaviour
                 if (playerRow < MAX_ROWS - 1 && !objectArray[playerRow + 1, playerCol].Equals(TREE) && mapArray[playerRow + 1, playerCol].Equals(LAND))
                 {
                     //Debug.Log("Player Row: " + playerRow + " Player Col: " + playerCol);
-                   // Debug.Log("ObjectArray value at " + (playerRow + 1) + ", " + playerCol + ": " + objectArray[playerRow + 1, playerCol]);
-                   // Debug.Log("MapArray value at " + (playerRow + 1) + ", " + playerCol + ": " + mapArray[playerRow + 1, playerCol]);
+                    // Debug.Log("ObjectArray value at " + (playerRow + 1) + ", " + playerCol + ": " + objectArray[playerRow + 1, playerCol]);
+                    // Debug.Log("MapArray value at " + (playerRow + 1) + ", " + playerCol + ": " + mapArray[playerRow + 1, playerCol]);
 
+                    //update player animation
+                    player.GetComponent<Animator>().SetTrigger("Down");
                     objectArray[playerRow, playerCol] = EMPTY;
                     playerRow++;
                     objectArray[playerRow, playerCol] = PLAYER;
