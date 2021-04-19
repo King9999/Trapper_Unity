@@ -20,11 +20,14 @@ public class Game : MonoBehaviour
     public UI ui;           //need this to make changes to UI such as stage number or lives.
     public AudioSource audioSource;
     public AudioClip audioFall;
+    public Animator transition;
+    public Animator playerAnim;
 
     //GameObjectManager objManager;       //used to create the level objects and tiles at runtime.
     GameObject player;                  //used to create a player at runtime so that I can get their position and move them when necessary.
 
     //prefabs
+    [Header("Prefabs")]
     public GameObject playerPrefab;
     public GameObject treePrefab;
     public GameObject creaturePrefab;
@@ -179,10 +182,7 @@ public class Game : MonoBehaviour
 
         if (playerDead)
         {
-            ResetLevel();
-            playerLives--;
-            ui.SetLivesText(playerLives);
-            playerDead = false;          
+            ResetLevel();        
         }
 
         if (creatureTrapLocations.Count > 0)
@@ -753,12 +753,17 @@ public class Game : MonoBehaviour
 
     }
 
+
+
     void ResetLevel()
     {
+        //fade screen
+        transition.SetTrigger("Start");
+
         //clear all objects and rebuild level.
         for (int i = 0; i < trapList.Count; i++)
             Destroy(trapList[i]);
-       
+
         for (int i = 0; i < creatureList.Count; i++)
             Destroy(creatureList[i]);
 
@@ -773,5 +778,13 @@ public class Game : MonoBehaviour
 
         objectArray = (string[,])initObjArray.Clone();
         BuildObjects(objectArray);
+
+        playerLives--;
+        ui.SetLivesText(playerLives);
+        playerDead = false;
+        
+        transition.SetTrigger("End");
+
     }
+
 }
