@@ -236,7 +236,7 @@ public class Game : MonoBehaviour
     {
         winImage.enabled = true;    //animation plays immediately
         yield return new WaitForSeconds(0.8f);
-        audioSource.PlayOneShot(audioWin, 0.1f);
+        audioSource.PlayOneShot(audioWin);
         Debug.Log("play win sound");
     }
 
@@ -494,75 +494,75 @@ public class Game : MonoBehaviour
 		{
             for (int col = 0; col < MAX_COLS; col++) 
 		    {
-                GameObject obj = new GameObject();
+                //GameObject obj = new GameObject();
                 
                 switch (map[row, col])
                 {
                     
                     case WATER:
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/tile_water"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
-                        obj = Instantiate(waterPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));                       
+                        mapList.Add(Instantiate(waterPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0)));                       
                         //Debug.Log("Water Location: " + waterObj.transform.position);
                         break;
 
                     case LAND:
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/tile_land"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
-                        obj = Instantiate(landPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
+                        mapList.Add(Instantiate(landPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0)));
                         break;
 
                     case LAND_BOTTOM:
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_bottom"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
-                        obj = Instantiate(landBottomPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
+                        mapList.Add(Instantiate(landBottomPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0)));
                         break;
 
                     case LAND_TOP:
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_top"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
-                        obj = Instantiate(landTopPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
+                        mapList.Add(Instantiate(landTopPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0)));
                         break;
 
                     case LAND_LEFT:
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_left"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
-                        obj = Instantiate(landLeftPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
+                        mapList.Add(Instantiate(landLeftPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0)));
                         break;
 
                     case LAND_RIGHT:
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_right"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
-                        obj = Instantiate(landRightPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
+                        mapList.Add(Instantiate(landRightPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0)));
                         break;
 
                     case LAND_UPLEFT:
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_upperleft"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
-                        obj = Instantiate(landTopLeftPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
+                        mapList.Add(Instantiate(landTopLeftPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0)));
                         break;
 
                     case LAND_UPRIGHT:  //TODO: Does not display correctly normally. Had to switch the orignial values to get it to work.
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_upperright"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
-                        obj = Instantiate(landTopRightPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
+                        mapList.Add(Instantiate(landTopRightPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0)));
                         break;
 
                     case LAND_BTMLEFT:
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_bottomleft"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
-                        obj = Instantiate(landBottomLeftPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
+                        mapList.Add(Instantiate(landBottomLeftPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0)));
                         break;
 
                     case LAND_BTMRIGHT: //TODO: Does not display correctly normally. Had to switch the orignial values to get it to work.
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_bottomright"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
-                        obj = Instantiate(landBottomRightPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
+                        mapList.Add(Instantiate(landBottomRightPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0)));
                         break;
 
                     case LAND_TOPBTM:
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_topbottom"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
-                        obj = Instantiate(landTopBottomPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
+                        mapList.Add(Instantiate(landTopBottomPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0)));
                         break;
 
                     case LAND_TOPBTMLEFT:
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_topbottomleft"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
-                        obj = Instantiate(landTopBottomLeftPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
+                        mapList.Add(Instantiate(landTopBottomLeftPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0)));
                         break;
 
                     case LAND_TOPBTMRIGHT:
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_topbottomright"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
-                        obj = Instantiate(landTopBottomRightPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
+                        mapList.Add(Instantiate(landTopBottomRightPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0)));
                         break;
 
                     default:
@@ -570,7 +570,7 @@ public class Game : MonoBehaviour
 
                         
                 }
-                mapList.Add(obj);
+                //mapList.Add(obj);
                 i++;
             }
         }

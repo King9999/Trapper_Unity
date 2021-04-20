@@ -1084,7 +1084,9 @@ MonoBehaviour:
   playerLives: 3
   audioSource: {fileID: 764012654}
   audioFall: {fileID: 8300000, guid: 41057a467807424419b9f10783142bbb, type: 3}
+  audioWin: {fileID: 8300000, guid: a165bbb5e8dd4074789eacc2e951b330, type: 3}
   transition: {fileID: 1118042746}
+  winImage: {fileID: 1143496359}
   playerPrefab: {fileID: 783297774951505974, guid: 1ee13c6ff1e4c394b8221e77a9ca25dd, type: 3}
   treePrefab: {fileID: 3834049968605711515, guid: 0ad65c59a6733fb408302df23b679b10, type: 3}
   creaturePrefab: {fileID: 6884281912398781217, guid: 34acb191fff671c4f9e4c4703ae5dd53, type: 3}
