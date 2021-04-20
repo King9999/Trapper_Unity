@@ -27,7 +27,7 @@ public class Game : MonoBehaviour
     public AudioSource audioSource;
     public AudioClip audioFall;
     public Animator transition;
-    public Animator playerAnim;
+    //public Animator playerAnim;
 
     //GameObjectManager objManager;       //used to create the level objects and tiles at runtime.
     GameObject player;                  //used to create a player at runtime so that I can get their position and move them when necessary.
@@ -229,7 +229,9 @@ public class Game : MonoBehaviour
                         //creature has the same movement restrictions as player, but other creatures prevent them from moving also.
                         if (creatureCol[i] < MAX_COLS - 1 && !objectArray[creatureRow[i], creatureCol[i] + 1].Equals(TREE) && !objectArray[creatureRow[i], creatureCol[i] + 1].Equals(CREATURE)
                             && mapArray[creatureRow[i], creatureCol[i] + 1].Equals(LAND))
-                        {                               
+                        {
+                            //update creature animation
+                            creature.GetComponent<Animator>().SetTrigger("Right");
                             objectArray[creatureRow[i], creatureCol[i]] = EMPTY;
                             creatureCol[i]++;
                             objectArray[creatureRow[i], creatureCol[i]] = CREATURE;
@@ -244,7 +246,7 @@ public class Game : MonoBehaviour
                     //Debug.Log("New Player Destination: " + playerDestination);
                 }
             }
-            if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D))
+            else if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D))
             {
                 if (playerCol < MAX_COLS - 1 && !objectArray[playerRow, playerCol + 1].Equals(TREE) && mapArray[playerRow, playerCol + 1].Equals(LAND))
                 {
@@ -271,7 +273,9 @@ public class Game : MonoBehaviour
                         if (creatureCol[i] > 0 && !objectArray[creatureRow[i], creatureCol[i] - 1].Equals(TREE) && !objectArray[creatureRow[i], creatureCol[i] - 1].Equals(CREATURE)
                             && mapArray[creatureRow[i], creatureCol[i] - 1].Equals(LAND))
                         {
-                        
+
+                            //update creature animation
+                            creature.GetComponent<Animator>().SetTrigger("Left");
                             objectArray[creatureRow[i], creatureCol[i]] = EMPTY;
                             creatureCol[i]--;
                             objectArray[creatureRow[i], creatureCol[i]] = CREATURE;
@@ -281,7 +285,7 @@ public class Game : MonoBehaviour
                     }
                 }
             }
-            if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W))
+            else if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W))
             {
                 if (playerRow > 0 && !objectArray[playerRow - 1, playerCol].Equals(TREE) && mapArray[playerRow - 1, playerCol].Equals(LAND))
                 {
@@ -307,6 +311,8 @@ public class Game : MonoBehaviour
                         if (creatureRow[i] < MAX_ROWS - 1 && !objectArray[creatureRow[i] + 1, creatureCol[i]].Equals(TREE) && !objectArray[creatureRow[i] + 1, creatureCol[i]].Equals(CREATURE)
                             && mapArray[creatureRow[i] + 1, creatureCol[i]].Equals(LAND))
                         {
+                            //update creature animation
+                            creature.GetComponent<Animator>().SetTrigger("Down");
                             objectArray[creatureRow[i], creatureCol[i]] = EMPTY;
                             creatureRow[i]++;
                             objectArray[creatureRow[i], creatureCol[i]] = CREATURE;
@@ -316,7 +322,7 @@ public class Game : MonoBehaviour
                     }
                 }
             }
-            if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S))
+            else if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S))
             {
                 if (playerRow < MAX_ROWS - 1 && !objectArray[playerRow + 1, playerCol].Equals(TREE) && mapArray[playerRow + 1, playerCol].Equals(LAND))
                 {
@@ -342,6 +348,8 @@ public class Game : MonoBehaviour
                         if (creatureRow[i] > 0 && !objectArray[creatureRow[i] - 1, creatureCol[i]].Equals(TREE) && !objectArray[creatureRow[i] - 1, creatureCol[i]].Equals(CREATURE)
                             && mapArray[creatureRow[i] - 1, creatureCol[i]].Equals(LAND))
                         {
+                            //update creature animation
+                            creature.GetComponent<Animator>().SetTrigger("Up");
                             objectArray[creatureRow[i], creatureCol[i]] = EMPTY;
                             creatureRow[i]--;
                             objectArray[creatureRow[i], creatureCol[i]] = CREATURE;
@@ -601,7 +609,6 @@ public class Game : MonoBehaviour
             else
             {
                 player.transform.position = new Vector3(player.transform.position.x + (MOVE_SPEED * Time.deltaTime), player.transform.position.y, OBJECT_LAYER);
-                //TODO: while player is moving, player sprite animates
             }
 
         }
