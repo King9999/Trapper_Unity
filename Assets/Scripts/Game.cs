@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Xml;
 using System;
-using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 //This script is used to setup and control the game screen. It's also used to create new levels when the player completes the objective.
 
@@ -22,7 +22,7 @@ public class Game : MonoBehaviour
     int enemyTotal;
     bool gameOver;
     bool controlLocked;     //prevents any player input during win screen.
-    int waitTimer;          //used to delay screen changes in frames.
+    float waitTimer;          //used to delay screen changes in frames.
 
     [Header("Audio & Animation")]
     public AudioSource audioSource;
@@ -206,19 +206,32 @@ public class Game : MonoBehaviour
             if (creatureList.Count <= 0)
             {
                 controlLocked = true;
-                //winImage.enabled = true;    //animation plays immediately
+                winImage.SetTrigger("Win");
+                
 
                 //play win sound after win image finishes animating.
-                StartCoroutine(PlayWinAnimation());
+                //StartCoroutine(PlayWinAnimation());
 
-                //load up next level               
-                LoadLevel(++level);
-                BuildMap(mapArray);
-                ResetLevel();
-                playerLives++;
-                ui.SetLivesText(playerLives);
-                ui.SetStageText(level);
-                controlLocked = false;
+                if (winImage.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1.0f)
+                {
+                    audioSource.PlayOneShot(audioWin);
+                    //winImage.enabled = false;
+                    //winImage.playb
+                    
+                    //yield return new WaitForSeconds(5);
+                    //load up next level               
+                    LoadLevel(++level);
+                    BuildMap(mapArray);
+                    ResetLevel();
+                    playerLives++;
+                    ui.SetLivesText(playerLives);
+                    ui.SetStageText(level);
+
+                    //want the game to wait a few seconds before removing win image
+                    //winImage.SetTrigger("Reset");
+                    controlLocked = false;
+                    
+                }
             }
             else
             {
@@ -234,8 +247,9 @@ public class Game : MonoBehaviour
 
     IEnumerator PlayWinAnimation()
     {
-        winImage.enabled = true;    //animation plays immediately
-        yield return new WaitForSeconds(0.8f);
+        winImage.SetTrigger("Win");
+        while (winImage.GetCurrentAnimatorStateInfo(0).normalizedTime < 1.0f)
+            yield return null;// new WaitForSeconds(0.8f);
         audioSource.PlayOneShot(audioWin);
         Debug.Log("play win sound");
     }
@@ -834,7 +848,7 @@ public class Game : MonoBehaviour
     {
         //fade screen
         transition.SetTrigger("Start");
-
+               
         //clear all objects and rebuild level.
         for (int i = 0; i < trapList.Count; i++)
             Destroy(trapList[i]);
@@ -857,6 +871,7 @@ public class Game : MonoBehaviour
 
         objectArray = (string[,])initObjArray.Clone();
         BuildObjects(objectArray);
+        
         
         transition.SetTrigger("End");
 
