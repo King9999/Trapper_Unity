@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Xml;
 using System;
-using UnityEngine.SceneManagement;
 
 //This script is used to setup and control the game screen. It's also used to create new levels when the player completes the objective.
 
@@ -27,9 +26,8 @@ public class Game : MonoBehaviour
     [Header("Audio & Animation")]
     public AudioSource audioSource;
     public AudioClip audioFall;
-    public AudioClip audioWin;
     public Animator transition;
-    public Animator winImage;
+    //public Animator playerAnim;
 
     //GameObjectManager objManager;       //used to create the level objects and tiles at runtime.
     GameObject player;                  //used to create a player at runtime so that I can get their position and move them when necessary.
@@ -60,7 +58,7 @@ public class Game : MonoBehaviour
     string[,] initMapArray;   //used to restart current level
     string[,] initObjArray;   //used to restart current level
 
-    List<GameObject> mapList;               //contains map game objects (water, land)
+    List<string> mapList;
     List<string> objectList;
     List<string> initMapList;           //These lists are used to draw the map and objects.
     List<string> initObjList;
@@ -122,7 +120,7 @@ public class Game : MonoBehaviour
     List<GameObject> creatureList;
     List<bool> creatureTrapped;         //tracks when creatures land in traps.
     List<Vector2> creatureTrapLocations;        //tracks which creatures are trapped.
-	List<GameObject> treeList;         //not sure how to use these yet
+	//List<GameObject> treeList;         //not sure how to use these yet
 	List<GameObject> trapList;
     //List<Vector2> trapPositions;            //needed to destroy traps when necessary.
     //List<Vector2> treePositions;            //needed to check for collision
@@ -159,15 +157,15 @@ public class Game : MonoBehaviour
         //waterTile = new char[MAX_ROWS, MAX_COLS];
         //landTile = new char[MAX_ROWS, MAX_COLS];
 
-        mapList = new List<GameObject>();
-        //objectList = new List<string>();
-        //initMapList = new List<string>();
-        //initObjList = new List<string>();
+        mapList = new List<string>();
+        objectList = new List<string>();
+        initMapList = new List<string>();
+        initObjList = new List<string>();
 
         creatureList = new List<GameObject>();
         creatureTrapped = new List<bool>();
         creatureTrapLocations = new List<Vector2>();
-        treeList = new List<GameObject>();
+        //treeList = new List<GameObject>();
         trapList = new List<GameObject>();
         destinationList = new List<Vector2>();
         //trapPositions = new List<Vector2>();
@@ -185,59 +183,16 @@ public class Game : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!gameOver)
+        CheckForInput();
+        UpdateObjects();
+
+        if (playerDead)
         {
-
-            if (playerDead)
-            {
-                if (playerLives <= 0)
-                    gameOver = true;
-                else
-                {
-                    ResetLevel();
-                    playerLives--;
-                    ui.SetLivesText(playerLives);
-                    playerDead = false;
-                }
-            }
-
-
-            //win condition
-            if (creatureList.Count <= 0)
-            {
-                controlLocked = true;
-                //winImage.enabled = true;    //animation plays immediately
-
-                //play win sound after win image finishes animating.
-                StartCoroutine(PlayWinAnimation());
-
-                //load up next level               
-                LoadLevel(++level);
-                BuildMap(mapArray);
-                ResetLevel();
-                playerLives++;
-                ui.SetLivesText(playerLives);
-                ui.SetStageText(level);
-                controlLocked = false;
-            }
-            else
-            {
-                //game is ongoing
-                CheckForInput();
-                UpdateObjects();
-
-                if (creatureTrapLocations.Count > 0)
-                    RemoveCreatures();
-            }
+            ResetLevel();        
         }
-    }
 
-    IEnumerator PlayWinAnimation()
-    {
-        winImage.enabled = true;    //animation plays immediately
-        yield return new WaitForSeconds(0.8f);
-        audioSource.PlayOneShot(audioWin, 0.1f);
-        Debug.Log("play win sound");
+        if (creatureTrapLocations.Count > 0)
+            RemoveCreatures();
     }
 
     //All user input is checked here. Must go into Update method
@@ -413,12 +368,6 @@ public class Game : MonoBehaviour
         objectArray = new string[MAX_ROWS, MAX_COLS];
         initObjArray = new string[MAX_ROWS, MAX_COLS];
 
-        //remove any previous map game objects in case there was any left over.
-        for (int i = 0; i < mapList.Count; i++)
-            Destroy(mapList[i]);
-
-        mapList.Clear();
-
         if (level < 1 || level > 10)
             level = 1;
 
@@ -483,6 +432,7 @@ public class Game : MonoBehaviour
 
     }
 
+
     void BuildMap(string[,] map)//List<string> map)
     {
         
@@ -494,83 +444,80 @@ public class Game : MonoBehaviour
 		{
             for (int col = 0; col < MAX_COLS; col++) 
 		    {
-                GameObject obj = new GameObject();
+                //GameObject obj = new GameObject();
                 
                 switch (map[row, col])
                 {
                     
                     case WATER:
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/tile_water"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
-                        obj = Instantiate(waterPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));                       
+                        Instantiate(waterPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
                         //Debug.Log("Water Location: " + waterObj.transform.position);
                         break;
 
                     case LAND:
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/tile_land"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
-                        obj = Instantiate(landPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
+                        Instantiate(landPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
                         break;
 
                     case LAND_BOTTOM:
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_bottom"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
-                        obj = Instantiate(landBottomPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
+                        Instantiate(landBottomPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
                         break;
 
                     case LAND_TOP:
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_top"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
-                        obj = Instantiate(landTopPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
+                        Instantiate(landTopPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
                         break;
 
                     case LAND_LEFT:
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_left"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
-                        obj = Instantiate(landLeftPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
+                        Instantiate(landLeftPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
                         break;
 
                     case LAND_RIGHT:
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_right"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
-                        obj = Instantiate(landRightPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
+                        Instantiate(landRightPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
                         break;
 
                     case LAND_UPLEFT:
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_upperleft"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
-                        obj = Instantiate(landTopLeftPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
+                        Instantiate(landTopLeftPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
                         break;
 
                     case LAND_UPRIGHT:  //TODO: Does not display correctly normally. Had to switch the orignial values to get it to work.
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_upperright"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
-                        obj = Instantiate(landTopRightPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
+                        Instantiate(landTopRightPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
                         break;
 
                     case LAND_BTMLEFT:
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_bottomleft"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
-                        obj = Instantiate(landBottomLeftPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
+                        Instantiate(landBottomLeftPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
                         break;
 
                     case LAND_BTMRIGHT: //TODO: Does not display correctly normally. Had to switch the orignial values to get it to work.
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_bottomright"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
-                        obj = Instantiate(landBottomRightPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
+                        Instantiate(landBottomRightPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
                         break;
 
                     case LAND_TOPBTM:
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_topbottom"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
-                        obj = Instantiate(landTopBottomPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
+                        Instantiate(landTopBottomPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
                         break;
 
                     case LAND_TOPBTMLEFT:
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_topbottomleft"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
-                        obj = Instantiate(landTopBottomLeftPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
+                        Instantiate(landTopBottomLeftPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
                         break;
 
                     case LAND_TOPBTMRIGHT:
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Tiles/landedge_topbottomright"), new Vector3((float)col + xOffset, yOffset - (float)row, 0));
-                        obj = Instantiate(landTopBottomRightPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
+                        Instantiate(landTopBottomRightPrefab, new Vector3((float)col + xOffset, yOffset - (float)row, MAP_LAYER), new Quaternion(0, 0, 0, 0));
                         break;
 
                     default:
                         break;
-
-                        
                 }
-                mapList.Add(obj);
                 i++;
             }
         }
@@ -595,9 +542,9 @@ public class Game : MonoBehaviour
                     case TREE:
                         //objManager.SetupObject(obj, Resources.Load<Sprite>("Objects/tree"), new Vector3((float)col + xOffset, (float)row + yOffset, OBJECT_LAYER));
                         //obj.name = "Tree";
-                        //if (!playerDead)    //this is here so that trees aren't instantiated again when the level is reset.
-                        GameObject tree = Instantiate(treePrefab, new Vector3((float)col + xOffset, yOffset - (float)row, OBJECT_LAYER), new Quaternion(0, 0, 0, 0));
-                        treeList.Add(tree);
+                        if (!playerDead)    //this is here so that trees aren't instantiated again when the level is reset.
+                            Instantiate(treePrefab, new Vector3((float)col + xOffset, yOffset - (float)row, OBJECT_LAYER), new Quaternion(0, 0, 0, 0));
+                        //treeList.Add(treePrefab);
                         //treePositions.Add(new Vector2((float)col + xOffset, yOffset - (float)row));
                         break;
 
@@ -695,8 +642,8 @@ public class Game : MonoBehaviour
         else //at current destination
         {
             controlLocked = false;
-           
-            //check if player is on trap or creature
+            //TODO: stop sprite animation
+            //TODO: check if player is on trap or creature
             int i = 0;
             while (!playerDead && i < trapList.Count)
             {
@@ -842,11 +789,7 @@ public class Game : MonoBehaviour
         for (int i = 0; i < creatureList.Count; i++)
             Destroy(creatureList[i]);
 
-        for (int i = 0; i < treeList.Count; i++)
-            Destroy(treeList[i]);
-
         trapList.Clear();
-        treeList.Clear();
         creatureList.Clear();
         creatureRow.Clear();
         creatureCol.Clear();
@@ -857,6 +800,10 @@ public class Game : MonoBehaviour
 
         objectArray = (string[,])initObjArray.Clone();
         BuildObjects(objectArray);
+
+        playerLives--;
+        ui.SetLivesText(playerLives);
+        playerDead = false;
         
         transition.SetTrigger("End");
 
