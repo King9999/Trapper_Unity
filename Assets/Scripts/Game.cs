@@ -167,11 +167,33 @@ public class Game : MonoBehaviour
         BuildObjects(objectArray);
     }
 
+    IEnumerator PlayerCreatureCollision()
+    {
+        int i = 0;
+        while (!playerDead && i < creatureList.Count)
+        {
+            float diffX = player.transform.position.x - creatureList[i].transform.position.x;
+            float diffY = player.transform.position.y - creatureList[i].transform.position.y;
+            //if (player.transform.position.x == creatureList[i].transform.position.x && player.transform.position.y == creatureList[i].transform.position.y)
+            if (Mathf.Abs(diffX) >= 0 && Mathf.Abs(diffX) <= 0.05f && Mathf.Abs(diffY) >= 0 && Mathf.Abs(diffY) <= 0.05f)
+            {
+                audioSource.PlayOneShot(audioFall);
+                playerDead = true;
+               
+            }
+            else
+                i++;
+        }
+        yield return new WaitForSeconds(0.1f);
+    }
+
     // Update is called once per frame
     void Update()
     {
+        
         if (!gameOver)
         {
+            StartCoroutine(PlayerCreatureCollision());
             //lose condition
             if (playerDead)
             {
@@ -219,6 +241,7 @@ public class Game : MonoBehaviour
                     controlLocked = false;
                     setNewLevel = false;
                     levelComplete = false;
+                    //StopCoroutine(PlayWinAnimation());
                 }
                         
                     
@@ -727,6 +750,19 @@ public class Game : MonoBehaviour
             controlLocked = false;
            
             //check if player is on trap or creature
+
+            /*int i = 0;
+            while (!playerDead && i < creatureList.Count)
+            {
+                if (player.transform.position.x == creatureList[i].transform.position.x && player.transform.position.y == creatureList[i].transform.position.y)
+                {
+                    audioSource.PlayOneShot(audioFall);
+                    playerDead = true;
+                }
+                else
+                    i++;
+            }*/
+
             int i = 0;
             while (!playerDead && i < trapList.Count)
             {
