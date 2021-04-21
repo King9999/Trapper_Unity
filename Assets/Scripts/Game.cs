@@ -13,6 +13,7 @@ public class Game : MonoBehaviour
     int score;
     public UI ui;           //need this to make changes to UI such as stage number or lives.
     int levelIndex;         //used to navigate levels in XML file.
+    string currentState;    //used to prevent animations from repeating itself
 
     [Header("Level Info")]
     public TextAsset levelFile;
@@ -23,6 +24,7 @@ public class Game : MonoBehaviour
     bool gameOver;
     bool controlLocked;     //prevents any player input during win screen.
     float waitTimer;          //used to delay screen changes in frames.
+    bool levelComplete;
 
     [Header("Audio & Animation")]
     public AudioSource audioSource;
@@ -30,6 +32,7 @@ public class Game : MonoBehaviour
     public AudioClip audioWin;
     public Animator transition;
     public Animator winImage;
+    
 
     //GameObjectManager objManager;       //used to create the level objects and tiles at runtime.
     GameObject player;                  //used to create a player at runtime so that I can get their position and move them when necessary.
@@ -67,6 +70,8 @@ public class Game : MonoBehaviour
 
     int playerRow, playerCol;           //tracks player's position in the object array. Used for collision checking.         
 
+    const string ANIM_WIN_STATE = "Win_Anim";
+    const string ANIM_STOP_STATE = "Win_Stop";
     const int MAX_ROWS = 12;
 	const int MAX_COLS = 16;
 	const int TILE_SIZE = 64;
@@ -99,24 +104,12 @@ public class Game : MonoBehaviour
 	const string PLAYER = "P";
     const string EMPTY = "0";
 
-    //player direction frames.
-    const int LEFT = 1;
-	const int RIGHT = 10;
-	const int UP = 30;
-	const int DOWN = 20;
-
-    //creature direction frames.
-    const int CLEFT = 1;
-	const int CRIGHT = 2;
-	const int CUP = 3;
-	const int CDOWN = 4;
-
     //player data
     bool playerDead;
-    
+    bool setNewLevel;
+
     Vector2 playerDestination;  //used to move player to new spot on map.
-    int playerDirection;
-    int frameAdvance;           //used to change animation frames.
+  
 
     //creatures & objects
     List<GameObject> creatureList;
@@ -124,8 +117,6 @@ public class Game : MonoBehaviour
     List<Vector2> creatureTrapLocations;        //tracks which creatures are trapped.
 	List<GameObject> treeList;         //not sure how to use these yet
 	List<GameObject> trapList;
-    //List<Vector2> trapPositions;            //needed to destroy traps when necessary.
-    //List<Vector2> treePositions;            //needed to check for collision
 	List<Vector2> destinationList;		    //contains list of creature destinations on map.
     List<int> creatureRow;                 
     List<int> creatureCol;                   //tracks each creature's position in the object array.
@@ -134,16 +125,14 @@ public class Game : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        //level = 2;
+        setNewLevel = false;
+        currentState = ANIM_STOP_STATE;
+        levelComplete = false;
         levelIndex = 0;
         playerLives = 2;
         playerDead = false;
         controlLocked = false;
         waitTimer = 0;
-        //previousTime = 0;
-        //deltaTime = 0;
-        playerDirection = LEFT;
-        frameAdvance = 0;
         playerRow = 0;
         playerCol = 0;
         creatureRow = new List<int>();
@@ -156,8 +145,6 @@ public class Game : MonoBehaviour
         objectArray = new string[MAX_ROWS, MAX_COLS];
         initMapArray = new string[MAX_ROWS, MAX_COLS];
         initObjArray = new string[MAX_ROWS, MAX_COLS];
-        //waterTile = new char[MAX_ROWS, MAX_COLS];
-        //landTile = new char[MAX_ROWS, MAX_COLS];
 
         mapList = new List<GameObject>();
         //objectList = new List<string>();
@@ -170,8 +157,6 @@ public class Game : MonoBehaviour
         treeList = new List<GameObject>();
         trapList = new List<GameObject>();
         destinationList = new List<Vector2>();
-        //trapPositions = new List<Vector2>();
-        //treePositions = new List<Vector2>();
 
         ui.SetLivesText(playerLives);
         ui.SetStageText(level);
@@ -187,7 +172,7 @@ public class Game : MonoBehaviour
     {
         if (!gameOver)
         {
-
+            //lose condition
             if (playerDead)
             {
                 if (playerLives <= 0)
@@ -203,23 +188,24 @@ public class Game : MonoBehaviour
 
 
             //win condition
-            if (creatureList.Count <= 0)
+            if (levelComplete)
             {
                 controlLocked = true;
-                winImage.SetTrigger("Win");
-                
+                //winImage.SetTrigger("Win");
+                ChangeAnimationState(ANIM_WIN_STATE);
 
                 //play win sound after win image finishes animating.
-                //StartCoroutine(PlayWinAnimation());
+                
+                StartCoroutine(PlayWinAnimation());
+                //if (winImage.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1.0f)
+                 //{
+                //audioSource.PlayOneShot(audioWin);
 
-                if (winImage.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1.0f)
+                //load up next level
+                if (setNewLevel == true)
                 {
-                    audioSource.PlayOneShot(audioWin);
-                    //winImage.enabled = false;
-                    //winImage.playb
                     
-                    //yield return new WaitForSeconds(5);
-                    //load up next level               
+                    audioSource.PlayOneShot(audioWin);
                     LoadLevel(++level);
                     BuildMap(mapArray);
                     ResetLevel();
@@ -228,30 +214,60 @@ public class Game : MonoBehaviour
                     ui.SetStageText(level);
 
                     //want the game to wait a few seconds before removing win image
-                    //winImage.SetTrigger("Reset");
+
+                    //ChangeAnimationState(ANIM_STOP_STATE);
                     controlLocked = false;
-                    
+                    setNewLevel = false;
+                    levelComplete = false;
                 }
+                        
+                    
+               //}
             }
             else
             {
                 //game is ongoing
                 CheckForInput();
-                UpdateObjects();
+               // UpdateObjects();
 
                 if (creatureTrapLocations.Count > 0)
+                {
                     RemoveCreatures();
+                    if (creatureList.Count <= 0)
+                        levelComplete = true;
+                }
             }
         }
+        else  
+        {
+            //game is over. Send player back to title screen.
+        }
+    }
+
+    private void FixedUpdate()  //used this method for any movement or physics
+    {
+        UpdateObjects();
+    }
+
+    void ChangeAnimationState(string animState)
+    {
+        if (currentState == animState)
+            return;
+
+        winImage.Play(animState);
+
+        currentState = animState;
     }
 
     IEnumerator PlayWinAnimation()
     {
-        winImage.SetTrigger("Win");
-        while (winImage.GetCurrentAnimatorStateInfo(0).normalizedTime < 1.0f)
-            yield return null;// new WaitForSeconds(0.8f);
-        audioSource.PlayOneShot(audioWin);
-        Debug.Log("play win sound");
+        //setNewLevel = false;
+        //ChangeAnimationState(ANIM_WIN_STATE);
+        yield return new WaitForSeconds(1f);
+
+        //audioSource.PlayOneShot(audioWin);
+        ChangeAnimationState(ANIM_STOP_STATE);
+        setNewLevel = true;
     }
 
     //All user input is checked here. Must go into Update method
