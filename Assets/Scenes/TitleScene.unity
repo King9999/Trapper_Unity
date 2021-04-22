@@ -948,6 +948,11 @@ CanvasGroup:
   m_Interactable: 0
   m_BlocksRaycasts: 0
   m_IgnoreParentGroups: 0
+--- !u!95 &1678155423 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 4785444685704580393, guid: 765285c98661cf347b7c52715ff66a6f, type: 3}
+  m_PrefabInstance: {fileID: 2017390787}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &2003115961
 GameObject:
   m_ObjectHideFlags: 0
@@ -980,6 +985,7 @@ MonoBehaviour:
   cursor: {fileID: 1512097014}
   start: {fileID: 1433792772}
   help: {fileID: 1396499861}
+  anim: {fileID: 1678155423}
 --- !u!4 &2003115963
 Transform:
   m_ObjectHideFlags: 0

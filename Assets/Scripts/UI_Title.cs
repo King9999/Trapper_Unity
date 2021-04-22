@@ -8,9 +8,14 @@ using UnityEngine.SceneManagement;
 public class UI_Title : MonoBehaviour
 {
     //The player controls the cursor and select an option.
+    [Header("UI Stuff")]
     public Image cursor;
     public TextMeshProUGUI start;
     public TextMeshProUGUI help;
+
+    [Header("Animator")]
+    public Animator anim;
+
     TextMeshProUGUI[] menu;
     const int MENU_TOTAL = 2;
     const int START = 0;
@@ -55,9 +60,25 @@ public class UI_Title : MonoBehaviour
         {
             //check which menu option we're on and change scene
             if (currentOption == START)
-                SceneManager.LoadScene("GameScene");
+            {
+                //SceneManager.LoadScene("GameScene");
+                LoadGame();
+            }
             else if (currentOption == HELP)
                 SceneManager.LoadScene("HelpScene");
         }
+    }
+
+    void LoadGame()
+    {
+        StartCoroutine(LoadGameScene());
+    }
+
+    IEnumerator LoadGameScene()
+    {
+        anim.SetTrigger("Start");
+        yield return new WaitForSeconds(1f);
+        SceneManager.LoadScene("GameScene");
+        
     }
 }
