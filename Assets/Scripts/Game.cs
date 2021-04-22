@@ -25,6 +25,7 @@ public class Game : MonoBehaviour
     bool controlLocked;     //prevents any player input during win screen.
     float waitTimer;          //used to delay screen changes in frames.
     bool levelComplete;
+    bool levelReset;        //used to check when level is reloaded.
 
     [Header("Audio & Animation")]
     public AudioSource audioSource;
@@ -129,7 +130,7 @@ public class Game : MonoBehaviour
         currentState = ANIM_STOP_STATE;
         levelComplete = false;
         levelIndex = 0;
-        playerLives = 2;
+        //playerLives = 2;
         playerDead = false;
         controlLocked = false;
         waitTimer = 0;
@@ -137,6 +138,7 @@ public class Game : MonoBehaviour
         playerCol = 0;
         creatureRow = new List<int>();
         creatureCol = new List<int>();
+        levelReset = false;
 
         //objManager = new GameObjectManager();
         player = new GameObject();
@@ -201,10 +203,18 @@ public class Game : MonoBehaviour
                     gameOver = true;
                 else
                 {
-                    ResetLevel();
-                    playerLives--;
-                    ui.SetLivesText(playerLives);
-                    playerDead = false;
+                    if (!levelReset)
+                    {
+                        ResetLevel();
+                    }
+                    else
+                    {
+                        //once we get here, that means new level has finished reloading.
+                        playerLives--;
+                        ui.SetLivesText(playerLives);
+                        playerDead = false;
+                        levelReset = false;
+                    }
                 }
             }
 
@@ -214,7 +224,7 @@ public class Game : MonoBehaviour
             {
                 controlLocked = true;
                 //winImage.SetTrigger("Win");
-                ChangeAnimationState(ANIM_WIN_STATE);
+                ChangeAnimationState(winImage, ANIM_WIN_STATE);
 
                 //play win sound after win image finishes animating.
                 
@@ -275,12 +285,12 @@ public class Game : MonoBehaviour
         StartCoroutine(PlayerCreatureCollision());
     }
 
-    void ChangeAnimationState(string animState)
+    void ChangeAnimationState(Animator anim, string animState)
     {
         if (currentState == animState)
             return;
 
-        winImage.Play(animState);
+        anim.Play(animState);
 
         currentState = animState;
     }
@@ -292,7 +302,7 @@ public class Game : MonoBehaviour
         yield return new WaitForSeconds(1f);
 
         //audioSource.PlayOneShot(audioWin);
-        ChangeAnimationState(ANIM_STOP_STATE);
+        ChangeAnimationState(winImage, ANIM_STOP_STATE);
         setNewLevel = true;
     }
 
@@ -916,8 +926,9 @@ public class Game : MonoBehaviour
 
     void ResetLevel()
     {
+        StartCoroutine(RestartStage());
         //fade screen
-        transition.SetTrigger("Start");
+        /*transition.SetTrigger("Start");
                
         //clear all objects and rebuild level.
         for (int i = 0; i < trapList.Count; i++)
@@ -943,8 +954,76 @@ public class Game : MonoBehaviour
         BuildObjects(objectArray);
         
         
-        transition.SetTrigger("End");
+        transition.SetTrigger("End");*/
 
+    }
+
+    IEnumerator RestartStage()
+    {
+        //transition.SetTrigger("Start");
+        ChangeAnimationState(transition, "Crossfade_Start");
+
+        //start another coroutine to clear all objects
+        while (transition.GetComponent<CanvasGroup>().alpha < 1.0f)
+        {
+            yield return null;
+        }
+        //StartCoroutine(ClearObjects());
+
+        //clear all objects and rebuild level.
+        for (int i = 0; i < trapList.Count; i++)
+            Destroy(trapList[i]);
+
+        for (int i = 0; i < creatureList.Count; i++)
+            Destroy(creatureList[i]);
+
+        for (int i = 0; i < treeList.Count; i++)
+            Destroy(treeList[i]);
+
+        trapList.Clear();
+        treeList.Clear();
+        creatureList.Clear();
+        creatureRow.Clear();
+        creatureCol.Clear();
+        destinationList.Clear();
+        creatureTrapped.Clear();
+
+        Destroy(player);
+        objectArray = (string[,])initObjArray.Clone();
+        BuildObjects(objectArray);
+
+        //yield return new WaitForSeconds(1f);
+        //fade in in this coroutine
+        //transition.SetTrigger("End");
+        levelReset = true;
+        ChangeAnimationState(transition, "Crossfade_End");
+    }
+
+    IEnumerator ClearObjects()
+    {
+        //clear all objects and rebuild level.
+        for (int i = 0; i < trapList.Count; i++)
+            Destroy(trapList[i]);
+
+        for (int i = 0; i < creatureList.Count; i++)
+            Destroy(creatureList[i]);
+
+        for (int i = 0; i < treeList.Count; i++)
+            Destroy(treeList[i]);
+
+        trapList.Clear();
+        treeList.Clear();
+        creatureList.Clear();
+        creatureRow.Clear();
+        creatureCol.Clear();
+        destinationList.Clear();
+        creatureTrapped.Clear();
+
+        Destroy(player);
+        objectArray = (string[,])initObjArray.Clone();
+        BuildObjects(objectArray);
+        //yield return new WaitForSeconds(1f);
+        yield return null;
     }
 
 }

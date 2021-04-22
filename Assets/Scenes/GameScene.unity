@@ -967,7 +967,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5372181666713243146, guid: b9f6580e8e91a1f45855adfc7493ce20, type: 3}
       propertyPath: m_RootOrder
-      value: 4
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 5372181666713243146, guid: b9f6580e8e91a1f45855adfc7493ce20, type: 3}
       propertyPath: m_AnchorMax.x
@@ -1093,7 +1093,7 @@ MonoBehaviour:
   ui: {fileID: 1701302153}
   levelFile: {fileID: 4900000, guid: c0703714b4232b74bb1dc60720eb9237, type: 3}
   level: 1
-  playerLives: 3
+  playerLives: 100
   audioSource: {fileID: 764012654}
   audioFall: {fileID: 8300000, guid: 41057a467807424419b9f10783142bbb, type: 3}
   audioWin: {fileID: 8300000, guid: a165bbb5e8dd4074789eacc2e951b330, type: 3}
@@ -1277,8 +1277,8 @@ RectTransform:
   - {fileID: 1348837054}
   - {fileID: 1249546599}
   - {fileID: 747068605}
-  - {fileID: 1118042742}
   - {fileID: 1433385433}
+  - {fileID: 1118042742}
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1318,7 +1318,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4785444685704580389, guid: 765285c98661cf347b7c52715ff66a6f, type: 3}
       propertyPath: m_RootOrder
-      value: 3
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 4785444685704580389, guid: 765285c98661cf347b7c52715ff66a6f, type: 3}
       propertyPath: m_AnchorMax.x
@@ -1406,7 +1406,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4785444685704580394, guid: 765285c98661cf347b7c52715ff66a6f, type: 3}
       propertyPath: m_Alpha
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 765285c98661cf347b7c52715ff66a6f, type: 3}
