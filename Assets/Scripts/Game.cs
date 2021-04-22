@@ -193,7 +193,7 @@ public class Game : MonoBehaviour
         
         if (!gameOver)
         {
-            StartCoroutine(PlayerCreatureCollision());
+            //StartCoroutine(PlayerCreatureCollision());
             //lose condition
             if (playerDead)
             {
@@ -228,6 +228,8 @@ public class Game : MonoBehaviour
                 {
                     
                     audioSource.PlayOneShot(audioWin);
+
+                   
                     LoadLevel(++level);
                     BuildMap(mapArray);
                     ResetLevel();
@@ -270,6 +272,7 @@ public class Game : MonoBehaviour
     private void FixedUpdate()  //used this method for any movement or physics
     {
         UpdateObjects();
+        StartCoroutine(PlayerCreatureCollision());
     }
 
     void ChangeAnimationState(string animState)
@@ -296,8 +299,12 @@ public class Game : MonoBehaviour
     //All user input is checked here. Must go into Update method
     void CheckForInput()
     {
+        //reset level quickly but lose a life
+        if (Input.GetKeyDown(KeyCode.Space))
+            playerDead = true;
+
         //check for player input
-        if (!controlLocked)
+        if (!controlLocked && !playerDead)
         {
             if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A))
             {
@@ -472,8 +479,10 @@ public class Game : MonoBehaviour
 
         mapList.Clear();
 
-        if (level < 1 || level > 10)
+        if (level < 1 || level > MAX_LEVEL)
             level = 1;
+
+        this.level = level;
 
         //Debug.Log(levelFile.text);
 
@@ -698,7 +707,7 @@ public class Game : MonoBehaviour
     }
 
 
-    //Used to move all objects when necessary. Must go into Update method
+    //Used to move all objects when necessary. Must go into FixedUpdate method
     void UpdateObjects()
     {
        
@@ -838,11 +847,18 @@ public class Game : MonoBehaviour
             }
             else
             {
-                //creature is at current destination. Check if they're standing on a trap.
-                for (int j = 0; j < trapList.Count; j++)
+                //creature is at current destination. Check if they're standing on a trap. In situations where the player and creature land on a
+                //trap at the same time, player dies first. Without this check, the traps may not come back on map reset, causing a soft lock.
+                if (!playerDead)
                 {
-                    if (creature.transform.position.x == trapList[j].transform.position.x && creature.transform.position.y == trapList[j].transform.position.y)
-                        creatureTrapLocations.Add(creature.transform.position);
+                    for (int j = 0; j < trapList.Count; j++)
+                    {
+                        if (creature.transform.position.x == trapList[j].transform.position.x && creature.transform.position.y == trapList[j].transform.position.y)
+                        {
+                            creatureTrapLocations.Add(creature.transform.position);
+                            objectArray[creatureRow[i], creatureCol[i]] = EMPTY;
+                        }
+                    }
                 }
                
             }
@@ -854,11 +870,12 @@ public class Game : MonoBehaviour
     void RemoveCreatures()
     {
         /*IMPORTANT NOTE: when destroying objects, do not use foreach loops as Unity will try to use an object that no longer exists on the next iteration. */
-        
+
         //NOTE: creature must be destroyed before trap
+        
         for (int i = 0; i < creatureList.Count; i++)
         {
-            
+
             for (int j = 0; j < creatureTrapLocations.Count; j++)
             {
                 if (creatureList[i].transform.position.x == creatureTrapLocations[j].x && creatureList[i].transform.position.y == creatureTrapLocations[j].y)
@@ -891,6 +908,7 @@ public class Game : MonoBehaviour
                 }
             }
         }
+       
 
     }
 
