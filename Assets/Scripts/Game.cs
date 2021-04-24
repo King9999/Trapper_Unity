@@ -223,18 +223,26 @@ public class Game : MonoBehaviour
             if (levelComplete)
             {
                 controlLocked = true;
-                //winImage.SetTrigger("Win");
-                ChangeAnimationState(winImage, ANIM_WIN_STATE);
-
-                //play win sound after win image finishes animating.
-                
-                StartCoroutine(PlayWinAnimation());
-                //if (winImage.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1.0f)
-                 //{
-                //audioSource.PlayOneShot(audioWin);
-
+                                
+                //StartCoroutine(PlayWinAnimation());
+               
                 //load up next level
-                if (setNewLevel == true)
+                if(!levelReset)
+                {
+                    setNewLevel = true;
+                    ResetLevel();
+                }
+                else
+                {
+                    playerLives++;
+                    ui.SetLivesText(playerLives);
+                    ui.SetStageText(level);
+                    controlLocked = false;
+                    playerDead = false;
+                    levelReset = false;
+                    levelComplete = false;
+                }
+                /*if (setNewLevel == true)
                 {
                     
                     audioSource.PlayOneShot(audioWin);
@@ -254,7 +262,7 @@ public class Game : MonoBehaviour
                     setNewLevel = false;
                     levelComplete = false;
                     //StopCoroutine(PlayWinAnimation());
-                }
+                }*/
                         
                     
                //}
@@ -989,6 +997,13 @@ public class Game : MonoBehaviour
         creatureTrapped.Clear();
 
         Destroy(player);
+
+        if (levelComplete && setNewLevel == true)   //want to ensure this step is only performed once
+        {
+            LoadLevel(++level);
+            BuildMap(mapArray);
+            setNewLevel = false;
+        }
         objectArray = (string[,])initObjArray.Clone();
         BuildObjects(objectArray);
 
