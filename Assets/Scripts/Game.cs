@@ -26,6 +26,7 @@ public class Game : MonoBehaviour
     float waitTimer;          //used to delay screen changes in frames.
     bool levelComplete;
     bool levelReset;        //used to check when level is reloaded.
+    bool audioPlayed;       //used to ensure the win audio is played only once.
 
     [Header("Audio & Animation")]
     public AudioSource audioSource;
@@ -139,6 +140,7 @@ public class Game : MonoBehaviour
         creatureRow = new List<int>();
         creatureCol = new List<int>();
         levelReset = false;
+        audioPlayed = false;
 
         //objManager = new GameObjectManager();
         player = new GameObject();
@@ -195,7 +197,7 @@ public class Game : MonoBehaviour
         
         if (!gameOver)
         {
-            //StartCoroutine(PlayerCreatureCollision());
+           
             //lose condition
             if (playerDead)
             {
@@ -224,7 +226,7 @@ public class Game : MonoBehaviour
             {
                 controlLocked = true;
                                 
-                //StartCoroutine(PlayWinAnimation());
+                StartCoroutine(PlayWinAnimation());
                
                 //load up next level
                 if(!levelReset)
@@ -241,6 +243,7 @@ public class Game : MonoBehaviour
                     playerDead = false;
                     levelReset = false;
                     levelComplete = false;
+                    audioPlayed = false;
                 }
                 /*if (setNewLevel == true)
                 {
@@ -306,12 +309,20 @@ public class Game : MonoBehaviour
     IEnumerator PlayWinAnimation()
     {
         //setNewLevel = false;
-        //ChangeAnimationState(ANIM_WIN_STATE);
-        yield return new WaitForSeconds(1f);
+        ChangeAnimationState(winImage, ANIM_WIN_STATE);
+       
+        if (!audioPlayed)
+        {
+            audioSource.PlayOneShot(audioWin);
+            audioPlayed = true;
+        }
 
-        //audioSource.PlayOneShot(audioWin);
+        yield return new WaitForSeconds(2f);
+
+
         ChangeAnimationState(winImage, ANIM_STOP_STATE);
-        setNewLevel = true;
+        
+        //setNewLevel = true;
     }
 
     //All user input is checked here. Must go into Update method
