@@ -4,6 +4,7 @@ using UnityEngine;
 using System.Xml;
 using System;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 //This script is used to setup and control the game screen. It's also used to create new levels when the player completes the objective.
 
@@ -34,7 +35,12 @@ public class Game : MonoBehaviour
     public AudioClip audioWin;
     public Animator transition;
     public Animator winImage;
-    
+    public Animator loseImage;
+    const string ANIM_WIN_STATE = "Win_Anim";
+    const string ANIM_STOP_STATE = "Win_Stop";
+    const string ANIM_GAME_OVER = "Lose_Anim";
+    const string ANIM_GAME_OVER_STOP = "Lose_Stop";
+
 
     //GameObjectManager objManager;       //used to create the level objects and tiles at runtime.
     GameObject player;                  //used to create a player at runtime so that I can get their position and move them when necessary.
@@ -72,8 +78,7 @@ public class Game : MonoBehaviour
 
     int playerRow, playerCol;           //tracks player's position in the object array. Used for collision checking.         
 
-    const string ANIM_WIN_STATE = "Win_Anim";
-    const string ANIM_STOP_STATE = "Win_Stop";
+    
     const int MAX_ROWS = 12;
 	const int MAX_COLS = 16;
 	const int TILE_SIZE = 64;
@@ -201,6 +206,7 @@ public class Game : MonoBehaviour
             //lose condition
             if (playerDead)
             {
+                //playerLives--;
                 if (playerLives <= 0)
                     gameOver = true;
                 else
@@ -218,6 +224,8 @@ public class Game : MonoBehaviour
                         levelReset = false;
                     }
                 }
+
+                //ui.SetLivesText(playerLives);
             }
 
 
@@ -264,6 +272,14 @@ public class Game : MonoBehaviour
         else  
         {
             //game is over. Send player back to title screen.
+            
+            controlLocked = true;
+
+            //run coroutine to play game over image
+            StartCoroutine(PlayGameOverAnim());
+
+            //go back to title screen.
+            //SceneManager.LoadScene("TitleScene");
         }
     }
 
@@ -300,6 +316,15 @@ public class Game : MonoBehaviour
         ChangeAnimationState(winImage, ANIM_STOP_STATE);
         
         //setNewLevel = true;
+    }
+
+    IEnumerator PlayGameOverAnim()
+    {
+        ChangeAnimationState(loseImage, ANIM_GAME_OVER);
+
+        yield return new WaitForSeconds(3f);
+
+        SceneManager.LoadScene("TitleScene");
     }
 
     //All user input is checked here. Must go into Update method
@@ -558,7 +583,7 @@ public class Game : MonoBehaviour
         float xOffset = -7.5f; 
         float yOffset = 5.5f;      //Unity doesn't use screen coordinates (origin is in the middle of screen), so I have to use offset to position tiles properly.
        
-        for (int row = 0; row < MAX_ROWS; row++)// int row = MAX_ROWS - 1; row >= 0; row--)
+        for (int row = 0; row < MAX_ROWS; row++)
 		{
             for (int col = 0; col < MAX_COLS; col++) 
 		    {
