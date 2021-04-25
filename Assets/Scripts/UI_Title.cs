@@ -29,7 +29,7 @@ public class UI_Title : MonoBehaviour
         menu[HELP] = help;
 
         //cursor always begins at Start
-        cursor.transform.position = new Vector3(menu[START].transform.position.x - (menu[START].rectTransform.rect.width / 1.2f), cursor.transform.position.y, 0);
+        cursor.transform.position = new Vector3(menu[START].transform.position.x - (menu[START].rectTransform.rect.width / 1.3f), cursor.transform.position.y, 0);
         currentOption = START;
     }
 
@@ -42,7 +42,7 @@ public class UI_Title : MonoBehaviour
             if (currentOption >= MENU_TOTAL)
                 currentOption = START;
 
-            cursor.transform.position = new Vector3(menu[currentOption].transform.position.x - (menu[currentOption].rectTransform.rect.width / 1.2f),
+            cursor.transform.position = new Vector3(menu[currentOption].transform.position.x - (menu[currentOption].rectTransform.rect.width / 1.3f),
                 menu[currentOption].transform.position.y, 0);
         }
 
@@ -52,7 +52,7 @@ public class UI_Title : MonoBehaviour
             if (currentOption < 0)
                 currentOption = HELP;
 
-            cursor.transform.position = new Vector3(menu[currentOption].transform.position.x - (menu[currentOption].rectTransform.rect.width / 1.2f),
+            cursor.transform.position = new Vector3(menu[currentOption].transform.position.x - (menu[currentOption].rectTransform.rect.width / 1.3f),
                 menu[currentOption].transform.position.y, 0);
         }
 
