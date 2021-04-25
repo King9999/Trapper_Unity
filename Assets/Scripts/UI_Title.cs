@@ -62,23 +62,27 @@ public class UI_Title : MonoBehaviour
             if (currentOption == START)
             {
                 //SceneManager.LoadScene("GameScene");
-                LoadGame();
+                //LoadGame();
+                StartCoroutine(LoadGameScene("GameScene"));
             }
             else if (currentOption == HELP)
-                SceneManager.LoadScene("HelpScene");
+            {
+                //SceneManager.LoadScene("HelpScene");
+                StartCoroutine(LoadGameScene("HelpScene"));
+            }
         }
     }
 
-    void LoadGame()
+    /*void LoadGame()
     {
         StartCoroutine(LoadGameScene());
-    }
+    }*/
 
-    IEnumerator LoadGameScene()
+    IEnumerator LoadGameScene(string sceneName)
     {
         anim.SetTrigger("Start");
         yield return new WaitForSeconds(1f);
-        SceneManager.LoadScene("GameScene");
+        SceneManager.LoadScene(sceneName);
         
     }
 }
