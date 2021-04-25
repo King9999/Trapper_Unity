@@ -13,22 +13,22 @@ public class UI_Help : MonoBehaviour
    
     bool alphaOn = true;
     const float MOD_VALUE = 12f;
-    public Image[] backgrounds = new Image[2];
+    //public Image[] backgrounds = new Image[2];
 
     // Update is called once per frame
     void Update()
     {
         //scroll background
-        for (int i = 0; i < backgrounds.Length; i++)
+        /*for (int i = 0; i < backgrounds.Length; i++)
         {
-            backgrounds[i].rectTransform.position = new Vector3(backgrounds[i].rectTransform.position.x - 1/*(MOD_VALUE * Time.deltaTime)*/, backgrounds[i].rectTransform.position.y, 0);
+            backgrounds[i].rectTransform.position = new Vector3(backgrounds[i].rectTransform.position.x - (MOD_VALUE * Time.deltaTime), backgrounds[i].rectTransform.position.y, 0);
 
             //shift one of the backgrounds to the right side of the other if one of them goes off screen.
-            if (backgrounds[i].rectTransform.position.x  <= -1 * (Screen.width / 2))
+           /* if (backgrounds[i].rectTransform.position.x + (backgrounds[i].rectTransform.rect.width / 2) <= -1 * Screen.width)
             {
                 backgrounds[i].rectTransform.position = new Vector3(Screen.width - 1, backgrounds[i].rectTransform.position.y, 0);
             }
-        }
+        }*/
 
         //update the alpha
         if (alphaOn)
